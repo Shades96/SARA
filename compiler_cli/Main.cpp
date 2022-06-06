@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 
-#include "Parser.h"
+#include "Scanner.h"
 
 using std::cout;
 using std::string;
@@ -15,15 +15,15 @@ void usage()
 
 int main(int argc, char* argv[])
 {
-    Parser parser;
+    Scanner scanner;
     switch (argc) {
     case 1: {
-        parser.parse(std::cin);
+        scanner.lex(std::cin);
         break;
     }
     case 2: {
         std::ifstream input{ argv[1] };
-        parser.parse(input);
+        scanner.lex(input);
         break;
     }
     default: {
