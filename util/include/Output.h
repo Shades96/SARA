@@ -34,6 +34,20 @@ struct Output
 		}
 	};
 
+	struct Debug
+	{
+		static Debug& inst()
+		{
+			static Debug i;
+			return i;
+		}
+		Debug& operator<<(const string& str)
+		{
+			//std::cout << str;
+			return *this;
+		}
+	};
+
 	struct Error
 	{
 		static Error& inst()
@@ -56,8 +70,16 @@ struct Output
 	{
 		return Output::Log::inst();
 	}
+	static Debug& debug()
+	{
+		return Output::Debug::inst();
+	}
 	static Error& error()
 	{
-		return Output::Error::inst();
+		return Output::Error::inst() << "[ERROR] ";
+	}
+	static Error& error(int lineNum)
+	{
+		return Output::error() << "Line " << std::to_string(lineNum) << ": ";
 	}
 };

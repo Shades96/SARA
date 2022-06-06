@@ -1,0 +1,18 @@
+// This is a comment
+f(a,b,c) {
+    let x = 0;  // comment
+    x = !x;
+    x = -x;
+    x = x + x;
+    x = x * x;
+    x = x / x;
+    x = x && x;
+    x = x || x;
+    x = x < x;
+    x = x > x;
+    x = x == x;
+    if 0 {}
+    while 0 {}
+    return x;
+}
+
