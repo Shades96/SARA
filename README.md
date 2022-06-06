@@ -13,7 +13,7 @@ Language Spec
            ;
 
     // Function definition
-    Def: id '(' Pars ')' '{' Stats '}'
+    Def: id '(' Pars ')' Block
        ;
 
     // Function parameters (0-n)
@@ -21,14 +21,15 @@ Language Spec
         ;
 
     // Statements (0-n)
-    Stats: { Stat ';' }
+    Block: '{' { Stat ';' } '}'
          ;
 
     Stat: return Expr
-        | if Expr '{' Stats '}'
-        | while Expr '{' Stats '}'
+        | if Expr Block
+        | while Expr Block
         | let id '=' Expr
         | Lexpr '=' Expr
+        | Block
         | Term
         ;
 
