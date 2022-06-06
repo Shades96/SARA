@@ -4,35 +4,6 @@
 
 #include <regex>
 
-const int Scanner::Token::MAX_IDENTIFIER_LEN = 1024;
-const vector<string> Scanner::Token::MATCH
-{
-    "//(.|[ \t])*",
-    "!",
-    "-",
-    "\\+",
-    "\\*",
-    "/",
-    "&&",
-    "\\|\\|",
-    "<",
-    ">",
-    "==",
-    "=",
-    ";",
-    ",",
-    "\\(",
-    "\\)",
-    "\\[",
-    "\\]",
-    "\\{",
-    "\\}",
-    "return",
-    "if",
-    "while",
-    "let"
-};
-
 int Scanner::lex(std::istream& input)
 {
     if (input.fail()) {
@@ -58,21 +29,26 @@ int Scanner::lex(std::istream& input)
 
 			// try and find a matching token
             bool matched = false;
-			for (auto& matchStr : Scanner::Token::MATCH) {
-				Output::debug() << "Scanning '" << remLine << "' for '" << matchStr << "'...\n";
+            for (int t = 0; t < Scanner::Token::KIND_MATCHERS.size(); t++) {
+                const string& matchStr = Scanner::Token::KIND_MATCHERS[t];
+				//Output::debug() << "Scanning '" << remLine << "' for '" << matchStr << "'...\n";
 				try {
 					std::regex tokenRegex(matchStr);
 					std::smatch match;
 					std::regex_search(remLine, match, tokenRegex);
 					if (match.size() && !match.prefix().length()) {
-						Output::debug() << "Found " << matchStr << " ('" << match[0].str() << "')" << "\n";
+                        Output::debug() << "Found " << Scanner::Token::KIND_NAMES[t];
+                        if (t >= Scanner::Token::Kind::NUMBER) {
+                            Output::debug() << " '" << match[0].str() << "'";
+                        }
+                        Output::debug() << "\n";
                         remLine = match.suffix().str();
                         matched = true;
 						break;
 					}
 				}
 				catch (std::regex_error ex) {
-					Output::error(lineNum) << "Regex error: " << ex.what() << "\n";
+					Output::error(lineNum) << ex.what() << matchStr << "\n";
 				}
 			}
 
@@ -86,3 +62,63 @@ int Scanner::lex(std::istream& input)
     }
     return EXIT_SUCCESS;
 }
+
+const int Scanner::Token::MAX_IDENTIFIER_LEN = 1024;
+const vector<string> Scanner::Token::KIND_MATCHERS
+{
+    "//(.|[ \t])*",
+    "!",
+    "-",
+    "\\+",
+    "\\*",
+    "/",
+    "&&",
+    "\\|\\|",
+    "<",
+    ">",
+    "==",
+    "=",
+    ";",
+    ",",
+    "\\(",
+    "\\)",
+    "\\[",
+    "\\]",
+    "\\{",
+    "\\}",
+    "return",
+    "if",
+    "while",
+    "let",
+    "[0-9]+",
+    "[_a-zA-Z][_a-zA-Z0-9]*"
+};
+const vector<string> Scanner::Token::KIND_NAMES
+{
+    "//",
+    "!",
+    "-",
+    "+",
+    "*",
+    "/",
+    "&&",
+    "||",
+    "<",
+    ">",
+    "==",
+    "=",
+    ";",
+    ",",
+    "(",
+    ")",
+    "[",
+    "]",
+    "{",
+    "}",
+    "return",
+    "if",
+    "while",
+    "let",
+    "number",
+    "identifier"
+};

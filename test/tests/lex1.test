@@ -15,4 +15,3 @@ f(a,b,c) {
     while 0 {}
     return x;
 }
-

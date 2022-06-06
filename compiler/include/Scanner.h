@@ -45,7 +45,8 @@ public:
 			IDENTIFIER,
 		};
 		static const int MAX_IDENTIFIER_LEN;
-		static const vector<string> MATCH;
+		static const vector<string> KIND_MATCHERS;
+		static const vector<string> KIND_NAMES;
 	};
 
 	int lex(std::istream& input);

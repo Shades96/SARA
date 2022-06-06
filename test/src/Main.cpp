@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <sstream>
 #include <filesystem>
 
 #include "Scanner.h"
@@ -14,10 +15,17 @@ int main()
 {
     for (const auto &file : std::filesystem::directory_iterator(TEST_DIR_PATH)) {
         if (file.is_regular_file()) {
-            Output::log() << SEP << file.path().string() << "\n" << SEP;
+            std::ifstream stream{ file.path() };
+            std::stringstream strbuf;
+            strbuf << stream.rdbuf();
+            stream.clear();
+            stream.seekg(0, std::ios::beg);
+
+            Output::log() << SEP 
+                << file.path().string() << "\n" << SEP
+                << strbuf.str() << "\n" << SEP;
 
             Scanner scanner;
-            std::ifstream stream{ file.path() };
             scanner.lex(stream);
 
             Output::log() << SEP;
