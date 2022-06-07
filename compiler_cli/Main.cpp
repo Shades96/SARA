@@ -18,7 +18,7 @@ int main(int argc, char* argv[])
     Scanner scanner;
     Parser parser;
 
-    auto parse = [&parser](Scanner::Token t) { return parser.parse(t); };
+    auto parse = [&parser](Terminal t) { return parser.parse(t); };
 
     switch (argc) {
     case 1: {

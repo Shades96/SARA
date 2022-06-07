@@ -28,7 +28,7 @@ int main()
             Scanner scanner;
             Parser parser;
 
-            auto parse = [&parser](Scanner::Token t) { return parser.parse(t); };
+            auto parse = [&parser](Terminal t) { return parser.parse(t); };
 
             scanner.lex(stream, parse);
 
