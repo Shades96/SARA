@@ -29,16 +29,7 @@
     <ClInclude Include="include\Scanner.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Expression.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Function.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Statement.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Block.h">
+    <ClInclude Include="include\Terminal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

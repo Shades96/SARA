@@ -5,8 +5,8 @@
 class Parser
 {
 public:
-	int parse(Scanner::Token &token);
+	int parse(Terminal &token);
 
 private:
-	std::vector<Scanner::Token> tokens;
+	std::vector<Terminal> tokens;
 };

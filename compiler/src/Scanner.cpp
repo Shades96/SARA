@@ -4,7 +4,7 @@
 
 #include <regex>
 
-int Scanner::lex(std::istream& input, std::function<int(Token)> outputToken)
+int Scanner::lex(std::istream& input, std::function<int(Terminal)> outputToken)
 {
     if (input.fail()) {
         Output::error() << "Bad input\n";
@@ -29,21 +29,21 @@ int Scanner::lex(std::istream& input, std::function<int(Token)> outputToken)
 
 			// try and find a matching token
             bool matched = false;
-            for (int t = 0; t < Scanner::Token::KIND_MATCHERS.size(); t++) {
-                const string& matchStr = Scanner::Token::KIND_MATCHERS[t];
+            for (int t = 0; t < Terminal::KIND_MATCHERS.size(); t++) {
+                const string& matchStr = Terminal::KIND_MATCHERS[t];
 				//Output::debug() << "Scanning '" << remLine << "' for '" << matchStr << "'...\n";
 				try {
 					std::regex tokenRegex(matchStr);
 					std::smatch match;
 					std::regex_search(remLine, match, tokenRegex);
 					if (match.size() && !match.prefix().length()) {
-                        Output::debug() << "Found " << Scanner::Token::KIND_NAMES[t];
-                        if (t >= Scanner::Token::Kind::NUMBER) {
+                        Output::debug() << "Found " << Terminal::KIND_NAMES[t];
+                        if (t >= Terminal::Kind::NUMBER) {
                             Output::debug() << " '" << match[0].str() << "'";
                         }
                         Output::debug() << "\n";
 
-                        Token found((Token::Kind)t);
+                        Terminal found((Terminal::Kind)t);
                         outputToken(found);
 
                         remLine = match.suffix().str();
@@ -67,12 +67,8 @@ int Scanner::lex(std::istream& input, std::function<int(Token)> outputToken)
     return EXIT_SUCCESS;
 }
 
-Scanner::Token::Token(Scanner::Token::Kind kind)
-    : kind(kind)
-{}
-
-const int Scanner::Token::MAX_IDENTIFIER_LEN = 1024;
-const vector<string> Scanner::Token::KIND_MATCHERS
+const int Terminal::MAX_IDENTIFIER_LEN = 1024;
+const vector<string> Terminal::KIND_MATCHERS
 {
     "//(.|[ \t])*",
     "!",
@@ -101,7 +97,7 @@ const vector<string> Scanner::Token::KIND_MATCHERS
     "[0-9]+",
     "[_a-zA-Z][_a-zA-Z0-9]*"
 };
-const vector<string> Scanner::Token::KIND_NAMES
+const vector<string> Terminal::KIND_NAMES
 {
     "//",
     "!",

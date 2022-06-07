@@ -7,25 +7,25 @@
 
 using std::cout;
 
-int Parser::parse(Scanner::Token& token)
+int Parser::parse(Terminal& token)
 {
     NonTerminal params {
         Optional { vector<NonTerminal> {
             Repeat { vector<NonTerminal> {
-                Terminal { Scanner::Token::IDENTIFIER }, // id
-                Terminal { Scanner::Token::COMMA }  // ','
+                Terminal { Terminal::IDENTIFIER }, // id
+                Terminal { Terminal::COMMA }  // ','
             }},
-            Terminal { Scanner::Token::IDENTIFIER } // id
+            Terminal { Terminal::IDENTIFIER } // id
         }}
     };
     NonTerminal function{ vector<NonTerminal> {
-        Terminal { Scanner::Token::IDENTIFIER },        // id
-        Terminal { Scanner::Token::PARENTHESIS_OPEN },  // '('
+        Terminal { Terminal::IDENTIFIER },        // id
+        Terminal { Terminal::PARENTHESIS_OPEN },  // '('
         params,
-        Terminal { Scanner::Token::PARENTHESIS_CLOSE }, // ')'
+        Terminal { Terminal::PARENTHESIS_CLOSE }, // ')'
         NonTerminal { vector<NonTerminal> {} },         // Block
     }};
 
-    Output::log() << Scanner::Token::KIND_NAMES[token.kind] << "\n";
+    Output::log() << Terminal::KIND_NAMES[token.kind] << "\n";
     return EXIT_SUCCESS;
 }
