@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <functional>
 
 using std::string, std::vector;
 
@@ -44,12 +45,14 @@ public:
 			// ID
 			IDENTIFIER,
 		};
+		Kind kind;
+		Token(Kind kind);
 		static const int MAX_IDENTIFIER_LEN;
 		static const vector<string> KIND_MATCHERS;
 		static const vector<string> KIND_NAMES;
 	};
 
-	int lex(std::istream& input);
+	int lex(std::istream& input, std::function<int(Token)> outputToken);
 
 private:
 };

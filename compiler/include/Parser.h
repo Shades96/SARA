@@ -1,11 +1,12 @@
 #pragma once
 
-#include <fstream>
+#include "Scanner.h"
 
 class Parser
 {
 public:
-	int parse(std::istream &input);
+	int parse(Scanner::Token &token);
 
 private:
+	std::vector<Scanner::Token> tokens;
 };

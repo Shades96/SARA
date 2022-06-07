@@ -1,29 +1,33 @@
 #include <iostream>
 #include <string>
 
-#include "Scanner.h"
+#include "Parser.h"
+#include "Output.h"
 
-using std::cout;
 using std::string;
 
 const string PROG_NAME = "<program-name>";
 
 void usage()
 {
-    cout << PROG_NAME << " { " << "<input-file>" << " }\n";
+    Output::error() << PROG_NAME << " { " << "<input-file>" << " }\n";
 }
 
 int main(int argc, char* argv[])
 {
     Scanner scanner;
+    Parser parser;
+
+    auto parse = [&parser](Scanner::Token t) { return parser.parse(t); };
+
     switch (argc) {
     case 1: {
-        scanner.lex(std::cin);
+        scanner.lex(std::cin, parse);
         break;
     }
     case 2: {
         std::ifstream input{ argv[1] };
-        scanner.lex(input);
+        scanner.lex(input, parse);
         break;
     }
     default: {

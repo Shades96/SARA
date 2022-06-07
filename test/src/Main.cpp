@@ -3,7 +3,7 @@
 #include <sstream>
 #include <filesystem>
 
-#include "Scanner.h"
+#include "Parser.h"
 #include "Output.h"
 
 using std::string;
@@ -26,7 +26,11 @@ int main()
                 << strbuf.str() << "\n" << SEP;
 
             Scanner scanner;
-            scanner.lex(stream);
+            Parser parser;
+
+            auto parse = [&parser](Scanner::Token t) { return parser.parse(t); };
+
+            scanner.lex(stream, parse);
 
             Output::log() << SEP;
         }

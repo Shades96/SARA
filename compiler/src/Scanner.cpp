@@ -4,7 +4,7 @@
 
 #include <regex>
 
-int Scanner::lex(std::istream& input)
+int Scanner::lex(std::istream& input, std::function<int(Token)> outputToken)
 {
     if (input.fail()) {
         Output::error() << "Bad input\n";
@@ -42,6 +42,10 @@ int Scanner::lex(std::istream& input)
                             Output::debug() << " '" << match[0].str() << "'";
                         }
                         Output::debug() << "\n";
+
+                        Token found((Token::Kind)t);
+                        outputToken(found);
+
                         remLine = match.suffix().str();
                         matched = true;
 						break;
@@ -62,6 +66,10 @@ int Scanner::lex(std::istream& input)
     }
     return EXIT_SUCCESS;
 }
+
+Scanner::Token::Token(Scanner::Token::Kind kind)
+    : kind(kind)
+{}
 
 const int Scanner::Token::MAX_IDENTIFIER_LEN = 1024;
 const vector<string> Scanner::Token::KIND_MATCHERS
