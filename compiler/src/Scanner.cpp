@@ -29,7 +29,7 @@ int Scanner::lex(std::istream& input, std::function<int(Terminal)> outputToken)
 
 			// try and find a matching token
             bool matched = false;
-            int parseError;
+            int parseError = 0;
             for (int t = 0; t < Terminal::KIND_MATCHERS.size(); t++) {
                 const string& matchStr = Terminal::KIND_MATCHERS[t];
 				//Output::debug() << "Scanning '" << remLine << "' for '" << matchStr << "'...\n";
@@ -45,7 +45,9 @@ int Scanner::lex(std::istream& input, std::function<int(Terminal)> outputToken)
                         Output::debug() << "\n";
 
                         Terminal found((Terminal::Kind)t);
-                        parseError = outputToken(found);
+                        if (t != Terminal::Kind::SLASH_SLASH) {
+                            parseError = outputToken(found);
+                        }
 
                         matched = true;
                         if (!parseError) {
