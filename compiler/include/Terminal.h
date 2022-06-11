@@ -1,8 +1,11 @@
 #pragma once
 
-#include "NonTerminal.h"
+#include <string>
+#include <vector>
 
-struct Terminal : public NonTerminal
+using std::string, std::vector;
+
+struct Terminal
 {
 	enum Kind
 	{
@@ -38,8 +41,7 @@ struct Terminal : public NonTerminal
 		IDENTIFIER,
 	};
 	Terminal(Kind kind) :
-		kind(kind),
-		NonTerminal({})
+		kind(kind)
 	{}
 	Kind kind;
 	static const int MAX_IDENTIFIER_LEN;

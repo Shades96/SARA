@@ -32,5 +32,8 @@
     <ClInclude Include="include\Terminal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\NonTerminal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

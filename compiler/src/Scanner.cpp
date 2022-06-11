@@ -29,6 +29,7 @@ int Scanner::lex(std::istream& input, std::function<int(Terminal)> outputToken)
 
 			// try and find a matching token
             bool matched = false;
+            int parseError;
             for (int t = 0; t < Terminal::KIND_MATCHERS.size(); t++) {
                 const string& matchStr = Terminal::KIND_MATCHERS[t];
 				//Output::debug() << "Scanning '" << remLine << "' for '" << matchStr << "'...\n";
@@ -44,10 +45,12 @@ int Scanner::lex(std::istream& input, std::function<int(Terminal)> outputToken)
                         Output::debug() << "\n";
 
                         Terminal found((Terminal::Kind)t);
-                        outputToken(found);
+                        parseError = outputToken(found);
 
-                        remLine = match.suffix().str();
                         matched = true;
+                        if (!parseError) {
+                            remLine = match.suffix().str();
+                        }
 						break;
 					}
 				}
@@ -58,6 +61,10 @@ int Scanner::lex(std::istream& input, std::function<int(Terminal)> outputToken)
 
             if (!matched) {
                 Output::error(lineNum) << "Unexpected symbol '" << remLine << "'\n";
+                return EXIT_FAILURE;
+            }
+            if (parseError) {
+                Output::error(lineNum) << "Parser error: '" << remLine << "'\n";
                 return EXIT_FAILURE;
             }
         }
