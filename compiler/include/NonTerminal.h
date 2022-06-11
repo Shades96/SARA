@@ -56,9 +56,10 @@ class ParameterList : public NonTerminal
 public:
 	int parse(const Terminal& t) override;
 private:
-	static const string SEPARATOR;
+	static const Terminal::Kind SEPARATOR;
 	BracketPair delim { Terminal::Kind::PARENTHESIS_OPEN, Terminal::Kind::PARENTHESIS_CLOSE };
 	vector<string> params;
+	bool idExpected = false;
 	bool empty = true;
 };
 

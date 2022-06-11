@@ -74,24 +74,55 @@ int Block::parse(const Terminal& t)
 	return stmts.back().parse(t);
 }
 
-const string ParameterList::SEPARATOR = ",";
+const Terminal::Kind ParameterList::SEPARATOR = Terminal::Kind::COMMA;
 int ParameterList::parse(const Terminal& t)
 {
-	// TODO
 	auto err = delim.parse(t);
-	if (delim.isComplete()) {
-		complete = true;
+	if (empty) {
+		empty = false;
+		return EXIT_SUCCESS;
 	}
-	return EXIT_SUCCESS;
+	if (delim.isComplete()) {
+		if (idExpected) {
+			Output::error() << "Unexpected '" << Terminal::KIND_NAMES[t.kind] << "' - expected identifier\n";
+			return EXIT_FAILURE;
+		}
+		complete = true;
+		return EXIT_SUCCESS;
+	}
+
+	switch (t.kind) {
+	case SEPARATOR:
+		if (idExpected || params.empty()) {
+			Output::error() << "Unexpected '" << Terminal::KIND_NAMES[t.kind] << "' - expected identifier\n";
+			return EXIT_FAILURE;
+		}
+		idExpected = true;
+		return EXIT_SUCCESS;
+		break;
+	case Terminal::Kind::IDENTIFIER:
+		if (!idExpected && !params.empty()) {
+			Output::error() << "Unexpected " << Terminal::KIND_NAMES[t.kind] << "\n";
+			return EXIT_FAILURE;
+		}
+		idExpected = false;
+		params.push_back("param"); // TODO: save actual name
+		return EXIT_SUCCESS;
+		break;
+	default:
+		Output::error() << "Unexpected '" << Terminal::KIND_NAMES[t.kind] << "'\n";
+		return EXIT_FAILURE;
+		break;
+	}
 }
 
 int Function::parse(const Terminal& t)
 {
 	if (empty) {
-		empty = false;
 		if (t.kind != Terminal::Kind::IDENTIFIER) {
 			return EXIT_FAILURE;
 		}
+		empty = false;
 		return EXIT_SUCCESS;
 	}
 
