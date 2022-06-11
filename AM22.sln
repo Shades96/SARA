@@ -8,10 +8,20 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "runtime", "runtime\runtime.vcxproj", "{EFB302E2-6795-47C5-A0DB-5B6EA6572FBD}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test", "test\test.vcxproj", "{560EC0A2-02C3-42B3-B9D2-EFD1F21F0AAE}"
+	ProjectSection(ProjectDependencies) = postProject
+		{5DE835EF-8BE7-4F58-85E7-24D5475FBC19} = {5DE835EF-8BE7-4F58-85E7-24D5475FBC19}
+		{EFB302E2-6795-47C5-A0DB-5B6EA6572FBD} = {EFB302E2-6795-47C5-A0DB-5B6EA6572FBD}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "compiler_cli", "compiler_cli\compiler_cli.vcxproj", "{8C4FF99A-12D8-44D6-9D13-35DC443DAD6A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{5DE835EF-8BE7-4F58-85E7-24D5475FBC19} = {5DE835EF-8BE7-4F58-85E7-24D5475FBC19}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "runtime_cli", "runtime_cli\runtime_cli.vcxproj", "{2C250F02-EAF4-40DB-957C-5A746F4CED0A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{EFB302E2-6795-47C5-A0DB-5B6EA6572FBD} = {EFB302E2-6795-47C5-A0DB-5B6EA6572FBD}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
