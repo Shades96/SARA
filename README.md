@@ -28,9 +28,9 @@ Language Spec
         | if Expr Block
         | while Expr Block
         | let id '=' Expr
-        | Lexpr '=' Expr
         | Block
-        | Term
+        | Lexpr '=' Expr
+        | id '(' { Expr ',' } Expr ')'
         ;
 
     Lexpr: id

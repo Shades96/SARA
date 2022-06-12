@@ -11,8 +11,10 @@ class NonTerminal
 {
 public: 
 	virtual int parse(const Terminal& t) = 0;
+	bool isEmpty() { return empty; }
 	bool isComplete() { return complete; }
 protected:
+	bool empty = true;
 	bool complete = false;
 };
 
@@ -20,12 +22,10 @@ class BracketPair : public NonTerminal
 {
 public:
 	int parse(const Terminal& t) override;
-	bool isEmpty() { return empty; }
 	BracketPair(Terminal::Kind T_OPEN, Terminal::Kind T_CLOSE)
 		: T_OPEN(T_OPEN), T_CLOSE(T_CLOSE) {}
 private:
 	const Terminal::Kind T_OPEN, T_CLOSE;
-	bool empty = true;
 	vector<BracketPair> stack;
 };
 
@@ -35,20 +35,71 @@ public:
 	int parse(const Terminal& t) override;
 };
 
-class Statement : public NonTerminal
+class LExpression : public NonTerminal
 {
 public:
 	int parse(const Terminal& t) override;
 };
 
-class Block : public NonTerminal
+class Statement : public NonTerminal
+{
+public:
+	virtual int parse(const Terminal& t) override = 0;
+};
+
+class Block : public Statement
 {
 public:
 	int parse(const Terminal& t) override;
 private:
-	bool empty = true;
 	BracketPair delim { Terminal::Kind::CURLY_OPEN, Terminal::Kind::CURLY_CLOSE };
-	vector<Statement> stmts;
+	vector<unique_ptr<Statement>> stmts;
+};
+
+class Return : public Statement
+{
+public:
+	int parse(const Terminal& t) override;
+private:
+	Expression expr;
+};
+
+class Branch : public Statement
+{
+public:
+	int parse(const Terminal& t) override;
+private:
+	Expression cond;
+	Block block;
+};
+
+class Loop : public Statement
+{
+public:
+	int parse(const Terminal& t) override;
+private:
+	Expression cond;
+	Block block;
+};
+
+class Definition : public Statement
+{
+public:
+	int parse(const Terminal& t) override;
+private:
+	Terminal::Kind expectedTerm = Terminal::Kind::LET;
+	bool expectedExpr = false;
+	Expression expr;
+};
+
+class Assignment : public Statement
+{
+public:
+	int parse(const Terminal& t) override;
+private:
+	bool expectedExpr = false;
+	LExpression lexpr;
+	Expression expr;
 };
 
 class ParameterList : public NonTerminal
@@ -60,7 +111,6 @@ private:
 	BracketPair delim { Terminal::Kind::PARENTHESIS_OPEN, Terminal::Kind::PARENTHESIS_CLOSE };
 	vector<string> params;
 	bool idExpected = false;
-	bool empty = true;
 };
 
 class Function : public NonTerminal
@@ -68,7 +118,6 @@ class Function : public NonTerminal
 public:
 	int parse(const Terminal& t) override;
 private:
-	bool empty = true;
 	string name;
 	ParameterList params;
 	Block body;
