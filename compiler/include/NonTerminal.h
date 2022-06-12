@@ -26,7 +26,17 @@ public:
 		: T_OPEN(T_OPEN), T_CLOSE(T_CLOSE) {}
 private:
 	const Terminal::Kind T_OPEN, T_CLOSE;
-	vector<BracketPair> stack;
+};
+
+class ParameterList : public NonTerminal
+{
+public:
+	int parse(const Terminal& t) override;
+private:
+	static const Terminal::Kind SEPARATOR;
+	BracketPair delim{ Terminal::Kind::PARENTHESIS_OPEN, Terminal::Kind::PARENTHESIS_CLOSE };
+	vector<string> params;
+	bool idExpected = false;
 };
 
 class Expression : public NonTerminal
@@ -45,6 +55,30 @@ class Statement : public NonTerminal
 {
 public:
 	virtual int parse(const Terminal& t) override = 0;
+};
+
+class Call : public Statement
+{
+public:
+	int parse(const Terminal& t) override;
+};
+
+class Term : public NonTerminal
+{
+public:
+	int parse(const Terminal& t) override;
+private:
+	enum Kind {
+		NUMBER = 0,
+		REFERENCE,
+		ARRAY_READ,
+		FUNCTION_CALL,
+		EXPRESSION
+	} kind;
+	Terminal id;
+	Expression expr;
+	unique_ptr<BracketPair> exprDelim;
+	unique_ptr<Call> funCall;
 };
 
 class Block : public Statement
@@ -100,17 +134,6 @@ private:
 	bool expectedExpr = false;
 	LExpression lexpr;
 	Expression expr;
-};
-
-class ParameterList : public NonTerminal
-{
-public:
-	int parse(const Terminal& t) override;
-private:
-	static const Terminal::Kind SEPARATOR;
-	BracketPair delim { Terminal::Kind::PARENTHESIS_OPEN, Terminal::Kind::PARENTHESIS_CLOSE };
-	vector<string> params;
-	bool idExpected = false;
 };
 
 class Function : public NonTerminal

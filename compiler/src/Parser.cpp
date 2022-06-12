@@ -6,21 +6,13 @@
 
 int BracketPair::parse(const Terminal& t) 
 {
-	if (!stack.empty()) {
-		auto err = stack.back().parse(t);
-		if (stack.back().isComplete()) stack.pop_back();
-		return err;
-	}
-
 	if (t.kind == T_OPEN) {
 		if (empty) {
 			empty = false;
 			return EXIT_SUCCESS;
 		}
 		else {
-			BracketPair inner{ T_OPEN, T_CLOSE };
-			stack.push_back(inner);
-			return stack.back().parse(t);
+			return EXIT_FAILURE;
 		}
 	}
 	else if (t.kind == T_CLOSE) {
@@ -28,11 +20,82 @@ int BracketPair::parse(const Terminal& t)
 			return EXIT_FAILURE;
 		}
 		else {
-			Output::debug() << "Pair completed\n";
 			complete = true;
 			return EXIT_SUCCESS;
 		}
 	}
+	return EXIT_FAILURE;
+}
+
+int Term::parse(const Terminal& t)
+{
+	if (empty) {
+		switch (t.kind) {
+		case Terminal::Kind::NUMBER:
+			complete = true;
+			return EXIT_SUCCESS;
+			break;
+		case Terminal::Kind::IDENTIFIER:
+			kind = REFERENCE;
+			id = t;
+			return EXIT_SUCCESS;
+			break;
+		case Terminal::Kind::PARENTHESIS_OPEN:
+			kind = EXPRESSION;
+			exprDelim = std::make_unique<BracketPair>(
+				Terminal::Kind::PARENTHESIS_OPEN, Terminal::Kind::PARENTHESIS_CLOSE);
+			return exprDelim->parse(t);
+			break;
+		default:
+			return EXIT_FAILURE;
+			break;
+		}
+	}
+
+	if (kind == REFERENCE) {
+		switch (t.kind) {
+		case Terminal::Kind::BRACKET_OPEN:
+			kind = ARRAY_READ;
+			exprDelim = std::make_unique<BracketPair>(
+				Terminal::Kind::BRACKET_OPEN, Terminal::Kind::BRACKET_CLOSE);
+			return exprDelim->parse(t);
+			break;
+		case Terminal::Kind::PARENTHESIS_OPEN: {
+			kind = FUNCTION_CALL;
+			funCall = std::make_unique<Call>();
+			auto err = funCall->parse(id);
+			if (err) return EXIT_FAILURE;
+			return funCall->parse(t);
+			break; }
+		default:
+			complete = true;
+			return EXIT_FAILURE;
+			break;
+		}
+	}
+
+	if (kind == ARRAY_READ || kind == EXPRESSION) {
+		auto err = exprDelim->parse(t);
+		if (exprDelim->isComplete()) {
+			if (!expr.isComplete()) {
+				return EXIT_FAILURE;
+			}
+			else {
+				complete = true;
+				return err;
+			}
+		}
+		return expr.parse(t);
+	}
+
+	if (kind == FUNCTION_CALL) {
+		auto err = funCall->parse(t);
+		if (funCall->isComplete()) {
+			complete = true;
+		}
+		return err;
+	}
+
 	return EXIT_FAILURE;
 }
 
@@ -186,6 +249,13 @@ int Assignment::parse(const Terminal& t)
 	}
 
 	return expr.parse(t);
+}
+
+// TODO
+int Call::parse(const Terminal& t)
+{
+	complete = true;
+	return EXIT_SUCCESS;
 }
 
 int Block::parse(const Terminal& t)

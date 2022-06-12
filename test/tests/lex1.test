@@ -11,8 +11,10 @@ f(a,b,c) {
     x = x < x;
     x = x > x;
     x = x == x;
-    if 1 {
-        x = x + 1;
+    if 0 {
+        x = (x + 1) + 1;
+        x = x[0];
+        f(x,x,x);
     }
     while 0 {}
     return x;

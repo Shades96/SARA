@@ -37,18 +37,16 @@ Language Spec
          | id '[' Expr ']'
          ;
 
-    Expr: { '!' | '-' } Term
-        | Term { ( '+' | '-' ) Term }
-        | Term { ( '*' | '/' ) Term }
-        | Term { ('&&' | '||') Term }
-        | Term ( '<' | '==' | '>' ) Term
+    Expr: Term
+        | ( '!' | '-' ) Term
+        | Term ( '+' | '-' | '*' | '/' | '&&' | '||' | '<' | '==' | '>' ) Term
         ;
     
-    Term: '(' Expr ')'
-        | num
+    Term: num
         | id
         | id '[' Expr ']' 
         | id '(' { Expr ',' } Expr ')'
+        | '(' Expr ')'
         ;
 
 -------------
