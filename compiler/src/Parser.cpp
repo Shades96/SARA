@@ -119,7 +119,11 @@ int Expression::parse(const Terminal& t)
 			return EXIT_SUCCESS;
 			break;
 		default:
-			return term1->parse(t);
+			auto err = term1->parse(t);
+			if (term1->isComplete()) {
+				complete = true;
+			}
+			return err;
 			break;
 		}
 	}
