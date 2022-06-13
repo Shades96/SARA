@@ -43,6 +43,9 @@ struct Terminal
 	Terminal(Kind kind) :
 		kind(kind)
 	{}
+	Terminal() :
+		kind(SLASH_SLASH)
+	{}
 	Kind kind;
 	static const int MAX_IDENTIFIER_LEN;
 	static const vector<string> KIND_MATCHERS;

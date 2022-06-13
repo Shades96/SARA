@@ -39,16 +39,41 @@ private:
 	bool idExpected = false;
 };
 
+class Term;
 class Expression : public NonTerminal
 {
 public:
 	int parse(const Terminal& t) override;
+private:
+	enum Kind {
+		TERM,
+		NEGATION,
+		NEGATIVE,
+		ADDITION,
+		SUBTRACTION,
+		MULTIPLICATION,
+		DIVISION,
+		CONJUNCTION,
+		DISJUNCTION,
+		COMPARISON_LT,
+		COMPARISON_EQ,
+		COMPARISON_GT
+	} kind = TERM;
+	unique_ptr<Term> term1 = std::make_unique<Term>(), term2;
 };
 
 class LExpression : public NonTerminal
 {
 public:
 	int parse(const Terminal& t) override;
+private:
+	enum Kind {
+		VAR_WRITE,
+		ARRAY_WRITE,
+	} kind;
+	Terminal id;
+	Expression expr;
+	unique_ptr<BracketPair> exprDelim;
 };
 
 class Statement : public NonTerminal
@@ -76,7 +101,7 @@ private:
 		EXPRESSION
 	} kind;
 	Terminal id;
-	Expression expr;
+	unique_ptr<Expression> expr;
 	unique_ptr<BracketPair> exprDelim;
 	unique_ptr<Call> funCall;
 };

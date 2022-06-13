@@ -30,6 +30,7 @@ int BracketPair::parse(const Terminal& t)
 int Term::parse(const Terminal& t)
 {
 	if (empty) {
+		empty = false;
 		switch (t.kind) {
 		case Terminal::Kind::NUMBER:
 			complete = true;
@@ -42,6 +43,7 @@ int Term::parse(const Terminal& t)
 			break;
 		case Terminal::Kind::PARENTHESIS_OPEN:
 			kind = EXPRESSION;
+			expr = std::make_unique<Expression>();
 			exprDelim = std::make_unique<BracketPair>(
 				Terminal::Kind::PARENTHESIS_OPEN, Terminal::Kind::PARENTHESIS_CLOSE);
 			return exprDelim->parse(t);
@@ -77,7 +79,7 @@ int Term::parse(const Terminal& t)
 	if (kind == ARRAY_READ || kind == EXPRESSION) {
 		auto err = exprDelim->parse(t);
 		if (exprDelim->isComplete()) {
-			if (!expr.isComplete()) {
+			if (!expr->isComplete()) {
 				return EXIT_FAILURE;
 			}
 			else {
@@ -85,7 +87,7 @@ int Term::parse(const Terminal& t)
 				return err;
 			}
 		}
-		return expr.parse(t);
+		return expr->parse(t);
 	}
 
 	if (kind == FUNCTION_CALL) {
@@ -102,13 +104,131 @@ int Term::parse(const Terminal& t)
 // TODO
 int Expression::parse(const Terminal& t)
 {
-	complete = true;
+	//complete = true;
+	//return EXIT_SUCCESS;
+
+	if (empty) {
+		switch (t.kind)
+		{
+		case Terminal::Kind::BANG:
+			kind = NEGATION;
+			return EXIT_SUCCESS;
+			break;
+		case Terminal::Kind::DASH:
+			kind = NEGATIVE;
+			return EXIT_SUCCESS;
+			break;
+		default:
+			return term1->parse(t);
+			break;
+		}
+	}
+
+	if (!term1->isComplete()) {
+		auto err = term1->parse(t);
+		if (!term1->isComplete()) {
+			return err;
+		}
+		if (kind == NEGATION || kind == NEGATIVE) {
+			complete = true;
+			return err;
+		}
+	}
+
+	if (term2) {
+		auto err = term2->parse(t);
+		if (term2->isComplete()) {
+			complete = true;
+		}
+		return err;
+	}
+
+	switch (t.kind)
+	{
+	case Terminal::Kind::PLUS:
+		kind = ADDITION;
+		break;
+	case Terminal::Kind::DASH:
+		kind = SUBTRACTION;
+		break;
+	case Terminal::Kind::STAR:
+		kind = MULTIPLICATION;
+		break;
+	case Terminal::Kind::SLASH:
+		kind = DIVISION;
+		break;
+	case Terminal::Kind::AND_AND:
+		kind = CONJUNCTION;
+		break;
+	case Terminal::Kind::OR_OR:
+		kind = DISJUNCTION;
+		break;
+	case Terminal::Kind::LESS_THAN:
+		kind = COMPARISON_LT;
+		break;
+	case Terminal::Kind::EQUALS:
+		kind = COMPARISON_EQ;
+		break;
+	case Terminal::Kind::GREATER_THAN:
+		kind = COMPARISON_GT;
+		break;
+	default:
+		complete = true;
+		return EXIT_FAILURE;
+		break;
+	}
+	term2 = std::make_unique<Term>();
 	return EXIT_SUCCESS;
 }
 
-// TODO
 int LExpression::parse(const Terminal& t)
 {
+	if (empty) {
+		if (t.kind != Terminal::Kind::IDENTIFIER) {
+			return EXIT_FAILURE;
+		}
+		empty = false;
+		id = t;
+		return EXIT_SUCCESS;
+	}
+
+	if (kind == ARRAY_WRITE) {
+		auto err = exprDelim->parse(t);
+		if (exprDelim->isComplete()) {
+			if (!expr.isComplete()) {
+				return EXIT_FAILURE;
+			}
+			else {
+				complete = true;
+				return err;
+			}
+		}
+		return expr.parse(t);
+	}
+
+	switch (t.kind)
+	{
+	case Terminal::Kind::BRACKET_OPEN:
+		kind = ARRAY_WRITE;
+		exprDelim = std::make_unique<BracketPair>(
+			Terminal::Kind::BRACKET_OPEN, Terminal::Kind::BRACKET_CLOSE);
+		return exprDelim->parse(t);
+		break;
+	default:
+		kind = VAR_WRITE;
+		complete = true;
+		return EXIT_FAILURE;
+		break;
+	}
+
+	return EXIT_FAILURE;
+}
+
+// TODO
+int Call::parse(const Terminal& t)
+{
+	Output::log() << "Call statement complete\n";
+
 	complete = true;
 	return EXIT_SUCCESS;
 }
@@ -128,6 +248,7 @@ int Return::parse(const Terminal& t)
 	case Terminal::Kind::SEMICOLON:
 		if (expr.isComplete()) {
 			complete = true;
+			Output::log() << "Return statement complete\n";
 			return EXIT_SUCCESS;
 		}
 		else {
@@ -158,6 +279,7 @@ int Branch::parse(const Terminal& t)
 
 	auto err = block.parse(t);
 	if (block.isComplete()) {
+		Output::log() << "Branch statement complete\n";
 		complete = true;
 	}
 	return err;
@@ -181,6 +303,7 @@ int Loop::parse(const Terminal& t)
 
 	auto err = block.parse(t);
 	if (block.isComplete()) {
+		Output::log() << "Loop statement complete\n";
 		complete = true;
 	}
 	return err;
@@ -188,6 +311,8 @@ int Loop::parse(const Terminal& t)
 
 int Definition::parse(const Terminal& t)
 {
+	Output::log() << "Parse definition statement...\n";
+
 	if (!expectedExpr) {
 		if (t.kind != expectedTerm) {
 			return EXIT_FAILURE;
@@ -212,6 +337,7 @@ int Definition::parse(const Terminal& t)
 
 	if (t.kind == Terminal::Kind::SEMICOLON) {
 		if (expr.isComplete()) {
+			Output::log() << "Definition statement complete\n";
 			complete = true;
 			return EXIT_SUCCESS;
 		}
@@ -223,7 +349,6 @@ int Definition::parse(const Terminal& t)
 	return expr.parse(t);
 }
 
-// TODO
 int Assignment::parse(const Terminal& t)
 {
 	if (!lexpr.isComplete()) {
@@ -240,6 +365,7 @@ int Assignment::parse(const Terminal& t)
 
 	if (t.kind == Terminal::Kind::SEMICOLON) {
 		if (expr.isComplete()) {
+			Output::log() << "Assignment statement complete\n";
 			complete = true;
 			return EXIT_SUCCESS;
 		}
@@ -251,13 +377,6 @@ int Assignment::parse(const Terminal& t)
 	return expr.parse(t);
 }
 
-// TODO
-int Call::parse(const Terminal& t)
-{
-	complete = true;
-	return EXIT_SUCCESS;
-}
-
 int Block::parse(const Terminal& t)
 {
 	auto err = delim.parse(t);
@@ -266,6 +385,7 @@ int Block::parse(const Terminal& t)
 		return err;
 	}
 	if (delim.isComplete()) {
+		Output::log() << "Block statement complete\n";
 		complete = true;
 		if (stmts.empty() || stmts.back()->isComplete()) {
 			return EXIT_SUCCESS;
@@ -361,6 +481,7 @@ int Function::parse(const Terminal& t)
 
 	auto err = body.parse(t);
 	if (body.isComplete()) {
+		Output::log() << "Function definition complete\n";
 		complete = true;
 	}
 	return err;
@@ -380,6 +501,5 @@ int Program::parse(const Terminal& t)
 
 int Parser::parse(Terminal& token)
 {
-	Output::debug() << Terminal::KIND_NAMES[token.kind] << "\n";
 	return program.parse(token);
 }
