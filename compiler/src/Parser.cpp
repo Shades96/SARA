@@ -108,6 +108,7 @@ int Expression::parse(const Terminal& t)
 	//return EXIT_SUCCESS;
 
 	if (empty) {
+		empty = false;
 		switch (t.kind)
 		{
 		case Terminal::Kind::BANG:
@@ -356,7 +357,10 @@ int Definition::parse(const Terminal& t)
 int Assignment::parse(const Terminal& t)
 {
 	if (!lexpr.isComplete()) {
-		return lexpr.parse(t);
+		auto err = lexpr.parse(t);
+		if (!lexpr.isComplete() || !err) {
+			return err;
+		}
 	}
 
 	if (!expectedExpr) {
