@@ -97,6 +97,10 @@ class Call : public Statement
 public:
 	int parse(const Terminal& t) override;
 	Call() : Statement(Kind::FUNCTION_CALL) {};
+private:
+	int nestingDepth = 0;
+	bool expectedParams = false;
+	vector<Expression> params;
 };
 
 class Term : public NonTerminal

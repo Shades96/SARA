@@ -19,6 +19,7 @@ f(a,b,c) {
         if 0 {
             f(x,x,x);
             x = f(x,x,x);
+            x = f(f(x,x,x),x,x);
         }
     }
     while 0 {}

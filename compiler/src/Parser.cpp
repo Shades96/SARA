@@ -248,13 +248,73 @@ int LExpression::parse(const Terminal& t)
 	return EXIT_FAILURE;
 }
 
-// TODO
+// TODO: handle nested parens
 int Call::parse(const Terminal& t)
 {
-	Output::log() << "Call statement complete\n";
+	if (empty) {
+		if (t.kind != Terminal::Kind::IDENTIFIER) {
+			Output::error() << "Unexpected '" << Terminal::KIND_NAMES[t.kind] << "' - expected identifier\n";
+			return EXIT_FAILURE;
+		}
+		empty = false;
+		expectedParams = true;
+		return EXIT_SUCCESS;
+	}
+	
+	if (expectedParams) {
+		if (t.kind != Terminal::Kind::PARENTHESIS_OPEN) {
+			Output::error() << "Unexpected '" << Terminal::KIND_NAMES[t.kind] << "' - expected " << Terminal::KIND_NAMES[Terminal::Kind::PARENTHESIS_OPEN] << "\n";
+			return EXIT_FAILURE;
+		}
+		expectedParams = false;
+		return EXIT_SUCCESS;
+	}
 
-	complete = true;
-	return EXIT_SUCCESS;
+	switch (t.kind) {
+	case Terminal::Kind::PARENTHESIS_OPEN:
+		if (params.empty() || params.back().isComplete()) {
+			Output::error() << "Unexpected '" << Terminal::KIND_NAMES[t.kind] << "' - expected expression\n";
+			return EXIT_FAILURE;
+		}
+		nestingDepth++;
+		return params.back().parse(t);
+		break;
+	case Terminal::Kind::PARENTHESIS_CLOSE:
+		if (nestingDepth == 0) {
+			if (!params.empty() && !params.back().isComplete()) {
+				auto err = params.back().parse(t);
+			}
+			if (params.empty() || params.back().isComplete()) {
+				Output::log() << "Call statement complete\n";
+				complete = true;
+				return EXIT_SUCCESS;
+			}
+			Output::error() << "Unexpected '" << Terminal::KIND_NAMES[t.kind] << "' - expected expression\n";
+			return EXIT_FAILURE;
+		}
+		nestingDepth--;
+		break;
+	case Terminal::Kind::COMMA:
+		if (nestingDepth == 0) {
+			if (!params.empty() && params.back().isComplete()) {
+				Output::error() << "Unexpected '" << Terminal::KIND_NAMES[t.kind] << "' - expected expression\n";
+				return EXIT_FAILURE;
+			}
+			return EXIT_SUCCESS;
+		}
+		break;
+	default:
+		break;
+	}
+
+	if (params.empty() || params.back().isComplete()) {
+		params.push_back(Expression());
+	}
+	auto err = params.back().parse(t);
+	if (err && params.back().isComplete()) {
+		return this->parse(t);
+	}
+	return err;
 }
 
 int Return::parse(const Terminal& t)
