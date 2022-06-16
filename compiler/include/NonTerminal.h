@@ -92,7 +92,6 @@ class Term : public NonTerminal
 {
 public:
 	int parse(const Terminal& t) override;
-private:
 	enum Kind {
 		NUMBER = 0,
 		REFERENCE,
@@ -100,6 +99,7 @@ private:
 		FUNCTION_CALL,
 		EXPRESSION
 	} kind;
+private:
 	Terminal id;
 	unique_ptr<Expression> expr;
 	unique_ptr<BracketPair> exprDelim;

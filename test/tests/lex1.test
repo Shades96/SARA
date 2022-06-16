@@ -1,6 +1,8 @@
 // This is a comment
 f(a,b,c) {
     let x = 0;  // comment
+    x = (x + 1) + 1;
+    x = x + (1 + 1);
     x = !x;
     x = -x;
     x = x + x;
@@ -13,8 +15,10 @@ f(a,b,c) {
     x = x == x;
     if 0 {
         x = (x + 1) + 1;
-        x = x[0];
-        f(x,x,x);
+        x = x[x + 1];
+        if 0 {
+            f(x,x,x);
+        }
     }
     while 0 {}
     return x;

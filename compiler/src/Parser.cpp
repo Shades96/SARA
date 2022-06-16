@@ -58,6 +58,7 @@ int Term::parse(const Terminal& t)
 		switch (t.kind) {
 		case Terminal::Kind::BRACKET_OPEN:
 			kind = ARRAY_READ;
+			expr = std::make_unique<Expression>();
 			exprDelim = std::make_unique<BracketPair>(
 				Terminal::Kind::BRACKET_OPEN, Terminal::Kind::BRACKET_CLOSE);
 			return exprDelim->parse(t);
@@ -80,6 +81,7 @@ int Term::parse(const Terminal& t)
 		auto err = exprDelim->parse(t);
 		if (exprDelim->isComplete()) {
 			if (!expr->isComplete()) {
+				Output::error() << "Unexpected '" << Terminal::KIND_NAMES[t.kind] << "' - expected expression\n";
 				return EXIT_FAILURE;
 			}
 			else {
@@ -134,6 +136,24 @@ int Expression::parse(const Terminal& t)
 		if (kind == NEGATION || kind == NEGATIVE) {
 			complete = true;
 			return err;
+		}
+		if (term1->kind == Term::Kind::EXPRESSION) {
+			if (t.kind == Terminal::Kind::PARENTHESIS_CLOSE) {
+				return err;
+			}
+			else {
+				Output::error() << "Unexpected '" << Terminal::KIND_NAMES[t.kind] << "' - expected " << Terminal::KIND_NAMES[Terminal::Kind::PARENTHESIS_CLOSE] << "\n";
+				return EXIT_FAILURE;
+			}
+		}
+		if (term1->kind == Term::Kind::ARRAY_READ) {
+			if (t.kind == Terminal::Kind::BRACKET_CLOSE) {
+				return err;
+			}
+			else {
+				Output::error() << "Unexpected '" << Terminal::KIND_NAMES[t.kind] << "' - expected " << Terminal::KIND_NAMES[Terminal::Kind::BRACKET_CLOSE] << "\n";
+				return EXIT_FAILURE;
+			}
 		}
 	}
 
@@ -397,6 +417,7 @@ int Assignment::parse(const Terminal& t)
 
 int Block::parse(const Terminal& t)
 {
+	// TODO: handle nested blocks
 	auto err = delim.parse(t);
 	if (empty) {
 		empty = false;
