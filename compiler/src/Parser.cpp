@@ -168,7 +168,7 @@ int Expression::parse(const Terminal& t)
 	case Terminal::Kind::LESS_THAN:
 		kind = COMPARISON_LT;
 		break;
-	case Terminal::Kind::EQUALS:
+	case Terminal::Kind::EQUALS_EQUALS:
 		kind = COMPARISON_EQ;
 		break;
 	case Terminal::Kind::GREATER_THAN:
