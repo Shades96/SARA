@@ -18,6 +18,7 @@ f(a,b,c) {
         x = x[x + 1];
         if 0 {
             f(x,x,x);
+            x = f(x,x,x);
         }
     }
     while 0 {}

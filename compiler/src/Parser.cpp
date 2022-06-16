@@ -385,7 +385,6 @@ int Assignment::parse(const Terminal& t)
 
 	if (!expectedExpr) {
 		if (t.kind != Terminal::Kind::EQUALS) {
-			Output::error() << "Unexpected '" << Terminal::KIND_NAMES[t.kind] << "' - expected " << Terminal::KIND_NAMES[Terminal::Kind::EQUALS] << "\n";
 			return EXIT_FAILURE;
 		}
 		expectedExpr = true;
@@ -459,9 +458,16 @@ int Block::parse(const Terminal& t)
 			stmts.push_back(std::make_unique<Block>());
 			break;
 		case Terminal::Kind::IDENTIFIER:
-			// TODO: could be Assignment or function call
+			// could be Assignment or function call
 			lookaheadBuf.push_back(t);
 			stmts.push_back(std::make_unique<Assignment>());
+			break;
+		case Terminal::Kind::SEMICOLON:
+			if (stmts.empty() || stmts.back()->kind == Statement::Kind::FUNCTION_CALL) {
+				return EXIT_SUCCESS;
+			}
+			Output::error() << "Unexpected '" << Terminal::KIND_NAMES[t.kind] << "' - expected statement\n";
+			return EXIT_FAILURE;
 			break;
 		default:
 			Output::error() << "Unexpected '" << Terminal::KIND_NAMES[t.kind] << "' - expected statement\n";

@@ -80,12 +80,23 @@ class Statement : public NonTerminal
 {
 public:
 	virtual int parse(const Terminal& t) override = 0;
+	enum Kind {
+		RETURN = 0,
+		BRANCH,
+		LOOP,
+		DEFINITION,
+		ASSIGNMENT,
+		FUNCTION_CALL,
+		BLOCK
+	} kind;
+	Statement(Kind kind) : kind(kind) {}
 };
 
 class Call : public Statement
 {
 public:
 	int parse(const Terminal& t) override;
+	Call() : Statement(Kind::FUNCTION_CALL) {};
 };
 
 class Term : public NonTerminal
@@ -110,6 +121,7 @@ class Block : public Statement
 {
 public:
 	int parse(const Terminal& t) override;
+	Block() : Statement(Kind::BLOCK) {};
 private:
 	BracketPair delim { Terminal::Kind::CURLY_OPEN, Terminal::Kind::CURLY_CLOSE };
 	vector<unique_ptr<Statement>> stmts;
@@ -121,6 +133,7 @@ class Return : public Statement
 {
 public:
 	int parse(const Terminal& t) override;
+	Return() : Statement(Kind::RETURN) {};
 private:
 	Expression expr;
 };
@@ -129,6 +142,7 @@ class Branch : public Statement
 {
 public:
 	int parse(const Terminal& t) override;
+	Branch() : Statement(Kind::BRANCH) {};
 private:
 	Expression cond;
 	Block block;
@@ -138,6 +152,7 @@ class Loop : public Statement
 {
 public:
 	int parse(const Terminal& t) override;
+	Loop() : Statement(Kind::LOOP) {};
 private:
 	Expression cond;
 	Block block;
@@ -147,6 +162,7 @@ class Definition : public Statement
 {
 public:
 	int parse(const Terminal& t) override;
+	Definition() : Statement(Kind::DEFINITION) {};
 private:
 	Terminal::Kind expectedTerm = Terminal::Kind::LET;
 	bool expectedExpr = false;
@@ -157,6 +173,7 @@ class Assignment : public Statement
 {
 public:
 	int parse(const Terminal& t) override;
+	Assignment() : Statement(Kind::ASSIGNMENT) {};
 private:
 	bool expectedExpr = false;
 	LExpression lexpr;
