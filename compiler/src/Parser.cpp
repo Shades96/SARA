@@ -336,8 +336,6 @@ int Loop::parse(const Terminal& t)
 
 int Definition::parse(const Terminal& t)
 {
-	Output::log() << "Parse definition statement...\n";
-
 	if (!expectedExpr) {
 		if (t.kind != expectedTerm) {
 			Output::error() << "Unexpected '" << Terminal::KIND_NAMES[t.kind] << "' - expected " << Terminal::KIND_NAMES[expectedTerm] << "\n";
@@ -404,6 +402,7 @@ int Assignment::parse(const Terminal& t)
 			// TODO: parse again
 			auto err = expr.parse(t);
 			if (expr.isComplete()) {
+				Output::log() << "Assignment statement complete\n";
 				complete = true;
 				return EXIT_SUCCESS;
 			}
@@ -417,23 +416,31 @@ int Assignment::parse(const Terminal& t)
 
 int Block::parse(const Terminal& t)
 {
-	// TODO: handle nested blocks
-	auto err = delim.parse(t);
-	if (empty) {
-		empty = false;
-		return err;
-	}
-	if (delim.isComplete()) {
-		Output::log() << "Block statement complete\n";
-		complete = true;
-		if (stmts.empty() || stmts.back()->isComplete()) {
-			return EXIT_SUCCESS;
+	if (nestingDepth == 0) {
+		auto err = delim.parse(t);
+		if (empty) {
+			empty = false;
+			return err;
 		}
-		Output::error() << "Unexpected '" << Terminal::KIND_NAMES[t.kind] << "' - expected statement\n";
-		return EXIT_FAILURE;
+		if (delim.isComplete()) {
+			Output::log() << "Block statement complete\n";
+			complete = true;
+			if (stmts.empty() || stmts.back()->isComplete()) {
+				return EXIT_SUCCESS;
+			}
+			Output::error() << "Unexpected '" << Terminal::KIND_NAMES[t.kind] << "' - expected statement\n";
+			return EXIT_FAILURE;
+		}
+	}
+	if (t.kind == Terminal::Kind::CURLY_OPEN) {
+		nestingDepth++;
+	}
+	else if (t.kind == Terminal::Kind::CURLY_CLOSE && nestingDepth > 0) {
+		nestingDepth--;
 	}
 
 	if (stmts.empty() || stmts.back()->isComplete()) {
+		lookaheadBuf.clear();
 		switch (t.kind)
 		{
 		case Terminal::Kind::RETURN:
@@ -453,6 +460,7 @@ int Block::parse(const Terminal& t)
 			break;
 		case Terminal::Kind::IDENTIFIER:
 			// TODO: could be Assignment or function call
+			lookaheadBuf.push_back(t);
 			stmts.push_back(std::make_unique<Assignment>());
 			break;
 		default:
@@ -461,7 +469,16 @@ int Block::parse(const Terminal& t)
 			break;
 		}
 	}
-	return stmts.back()->parse(t);
+
+	auto err = stmts.back()->parse(t);
+	if (err && lookaheadBuf.size()) {
+		stmts.pop_back();
+		stmts.push_back(std::make_unique<Call>());
+		err = stmts.back()->parse(lookaheadBuf[0]);
+		if (err) return err;
+		return stmts.back()->parse(t);
+	}
+	return err;
 }
 
 const Terminal::Kind ParameterList::SEPARATOR = Terminal::Kind::COMMA;

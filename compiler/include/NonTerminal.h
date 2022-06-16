@@ -113,6 +113,8 @@ public:
 private:
 	BracketPair delim { Terminal::Kind::CURLY_OPEN, Terminal::Kind::CURLY_CLOSE };
 	vector<unique_ptr<Statement>> stmts;
+	vector<Terminal> lookaheadBuf;
+	int nestingDepth = 0;
 };
 
 class Return : public Statement
