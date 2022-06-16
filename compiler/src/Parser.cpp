@@ -104,9 +104,6 @@ int Term::parse(const Terminal& t)
 // TODO
 int Expression::parse(const Terminal& t)
 {
-	//complete = true;
-	//return EXIT_SUCCESS;
-
 	if (empty) {
 		empty = false;
 		switch (t.kind)
@@ -190,6 +187,7 @@ int LExpression::parse(const Terminal& t)
 {
 	if (empty) {
 		if (t.kind != Terminal::Kind::IDENTIFIER) {
+			Output::error() << "Unexpected '" << Terminal::KIND_NAMES[t.kind] << "' - expected identifier\n";
 			return EXIT_FAILURE;
 		}
 		empty = false;
@@ -201,6 +199,7 @@ int LExpression::parse(const Terminal& t)
 		auto err = exprDelim->parse(t);
 		if (exprDelim->isComplete()) {
 			if (!expr.isComplete()) {
+				Output::error() << "Unexpected '" << Terminal::KIND_NAMES[t.kind] << "' - expected expression\n";
 				return EXIT_FAILURE;
 			}
 			else {
@@ -257,6 +256,7 @@ int Return::parse(const Terminal& t)
 			return EXIT_SUCCESS;
 		}
 		else {
+			Output::error() << "Unexpected '" << Terminal::KIND_NAMES[t.kind] << "' - expected expression\n";
 			return EXIT_FAILURE;
 		}
 		break;
@@ -320,6 +320,7 @@ int Definition::parse(const Terminal& t)
 
 	if (!expectedExpr) {
 		if (t.kind != expectedTerm) {
+			Output::error() << "Unexpected '" << Terminal::KIND_NAMES[t.kind] << "' - expected " << Terminal::KIND_NAMES[expectedTerm] << "\n";
 			return EXIT_FAILURE;
 		}
 		switch (t.kind)
@@ -347,6 +348,7 @@ int Definition::parse(const Terminal& t)
 			return EXIT_SUCCESS;
 		}
 		else {
+			Output::error() << "Unexpected '" << Terminal::KIND_NAMES[t.kind] << "' - expected expression\n";
 			return EXIT_FAILURE;
 		}
 	}
@@ -365,6 +367,7 @@ int Assignment::parse(const Terminal& t)
 
 	if (!expectedExpr) {
 		if (t.kind != Terminal::Kind::EQUALS) {
+			Output::error() << "Unexpected '" << Terminal::KIND_NAMES[t.kind] << "' - expected " << Terminal::KIND_NAMES[Terminal::Kind::EQUALS] << "\n";
 			return EXIT_FAILURE;
 		}
 		expectedExpr = true;
@@ -378,6 +381,13 @@ int Assignment::parse(const Terminal& t)
 			return EXIT_SUCCESS;
 		}
 		else {
+			// TODO: parse again
+			auto err = expr.parse(t);
+			if (expr.isComplete()) {
+				complete = true;
+				return EXIT_SUCCESS;
+			}
+			Output::error() << "Unexpected '" << Terminal::KIND_NAMES[t.kind] << "' - expected expression\n";
 			return EXIT_FAILURE;
 		}
 	}
@@ -398,6 +408,7 @@ int Block::parse(const Terminal& t)
 		if (stmts.empty() || stmts.back()->isComplete()) {
 			return EXIT_SUCCESS;
 		}
+		Output::error() << "Unexpected '" << Terminal::KIND_NAMES[t.kind] << "' - expected statement\n";
 		return EXIT_FAILURE;
 	}
 
@@ -424,6 +435,7 @@ int Block::parse(const Terminal& t)
 			stmts.push_back(std::make_unique<Assignment>());
 			break;
 		default:
+			Output::error() << "Unexpected '" << Terminal::KIND_NAMES[t.kind] << "' - expected statement\n";
 			return EXIT_FAILURE;
 			break;
 		}
@@ -477,6 +489,7 @@ int Function::parse(const Terminal& t)
 {
 	if (empty) {
 		if (t.kind != Terminal::Kind::IDENTIFIER) {
+			Output::error() << "Unexpected '" << Terminal::KIND_NAMES[t.kind] << "' - expected identifier\n";
 			return EXIT_FAILURE;
 		}
 		empty = false;
