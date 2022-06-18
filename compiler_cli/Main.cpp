@@ -29,6 +29,10 @@ int main(int argc, char* argv[])
     case 2: {
         Output::Bytecode::setOutfile(string(argv[1]) + ".sara");
         std::ifstream input{ argv[1] };
+        if (input.fail()) {
+            Output::error() << "Bad input\n";
+            return EXIT_FAILURE;
+        }
         scanner.lex(input, parse);
         break;
     }

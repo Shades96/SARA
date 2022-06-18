@@ -92,11 +92,11 @@ public:
 	Statement(Kind kind) : kind(kind) {}
 };
 
-class Call : public Statement
+class FunctionCall : public Statement
 {
 public:
 	int parse(const Terminal& t) override;
-	Call() : Statement(Kind::FUNCTION_CALL) {};
+	FunctionCall() : Statement(Kind::FUNCTION_CALL) {};
 private:
 	int nestingDepth = 0;
 	bool expectedParams = false;
@@ -118,7 +118,7 @@ private:
 	Terminal id;
 	unique_ptr<Expression> expr;
 	unique_ptr<BracketPair> exprDelim;
-	unique_ptr<Call> funCall;
+	unique_ptr<FunctionCall> funCall;
 };
 
 class Block : public Statement

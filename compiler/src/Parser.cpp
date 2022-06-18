@@ -65,7 +65,7 @@ int Term::parse(const Terminal& t)
 			break;
 		case Terminal::Kind::PARENTHESIS_OPEN: {
 			kind = FUNCTION_CALL;
-			funCall = std::make_unique<Call>();
+			funCall = std::make_unique<FunctionCall>();
 			auto err = funCall->parse(id);
 			if (err) return EXIT_FAILURE;
 			return funCall->parse(t);
@@ -247,7 +247,7 @@ int LExpression::parse(const Terminal& t)
 	return EXIT_FAILURE;
 }
 
-int Call::parse(const Terminal& t)
+int FunctionCall::parse(const Terminal& t)
 {
 	if (empty) {
 		if (t.kind != Terminal::Kind::IDENTIFIER) {
@@ -550,7 +550,7 @@ int Block::parse(const Terminal& t)
 	auto err = stmts.back()->parse(t);
 	if (err && lookaheadBuf.size()) {
 		stmts.pop_back();
-		stmts.push_back(std::make_unique<Call>());
+		stmts.push_back(std::make_unique<FunctionCall>());
 		err = stmts.back()->parse(lookaheadBuf[0]);
 		if (err) return err;
 		return stmts.back()->parse(t);

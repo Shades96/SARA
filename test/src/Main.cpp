@@ -5,6 +5,7 @@
 
 #include "Parser.h"
 #include "Output.h"
+#include "Instruction.h"
 
 using std::string;
 
@@ -29,17 +30,17 @@ int main()
 
     for (const auto &file : std::filesystem::directory_iterator(TEST_DIR_PATH)) {
         if (file.is_regular_file()) {
-            std::ifstream stream{ file.path() };
+            std::ifstream sourceStream{ file.path() };
             std::stringstream strbuf;
-            strbuf << stream.rdbuf();
-            stream.clear();
-            stream.seekg(0, std::ios::beg);
+            strbuf << sourceStream.rdbuf();
+            sourceStream.clear();
+            sourceStream.seekg(0, std::ios::beg);
 
-            string outfilePath = OUTPUT_DIR_PATH + PATH_SEP + file.path().filename().string() + ".sara";
-            Output::Bytecode::setOutfile(outfilePath);
+            string bytecodePath = OUTPUT_DIR_PATH + PATH_SEP + file.path().filename().string() + ".sara";
+            Output::Bytecode::setOutfile(bytecodePath);
 
             Output::log() << SEP 
-                << file.path().string() << " > " << outfilePath << "\n" << SEP
+                << file.path().string() << " > " << bytecodePath << "\n" << SEP
                 << strbuf.str() << "\n" << SEP;
 
             Scanner scanner;
@@ -47,7 +48,12 @@ int main()
 
             auto parse = [&parser](Terminal t) { return parser.parse(t); };
 
-            scanner.lex(stream, parse);
+            scanner.lex(sourceStream, parse);
+
+            Output::log() << SEP;
+
+            std::ifstream bytecodeStream{ bytecodePath };
+            vector<Instruction> instructions = Instruction::fromBytecode(bytecodeStream);
 
             Output::log() << SEP;
         }
