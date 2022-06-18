@@ -19,6 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\util\include\Instruction.h" />
+    <ClInclude Include="..\util\include\Output.h" />
+    <ClInclude Include="include\Runtime.h" />
+  </ItemGroup>
+  <ItemGroup>
     <ClCompile Include="src\Runtime.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

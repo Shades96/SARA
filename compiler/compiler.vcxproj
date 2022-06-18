@@ -23,6 +23,8 @@
     <ClCompile Include="src\Scanner.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\util\include\Instruction.h" />
+    <ClInclude Include="..\util\include\Output.h" />
     <ClInclude Include="include\NonTerminal.h" />
     <ClInclude Include="include\Parser.h" />
     <ClInclude Include="include\Scanner.h" />

@@ -22,10 +22,12 @@ int main(int argc, char* argv[])
 
     switch (argc) {
     case 1: {
+        Output::Bytecode::setOutfile("tmp.sara");
         scanner.lex(std::cin, parse);
         break;
     }
     case 2: {
+        Output::Bytecode::setOutfile(string(argv[1]) + ".sara");
         std::ifstream input{ argv[1] };
         scanner.lex(input, parse);
         break;

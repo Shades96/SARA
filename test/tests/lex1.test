@@ -6,8 +6,10 @@ f(a,b,c) {
     x = x + (1 + 1);
     x = !x;
     x = -x;
-    x = x + x;
-    x = x * x;
+    {
+        x = x + x;
+        x = x * x;
+    }
     x = x / x;
     x = x && x;
     x = x || x;

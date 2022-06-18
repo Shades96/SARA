@@ -15,6 +15,17 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Runtime.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\util\include\Instruction.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\util\include\Output.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
     <ClCompile Include="src\Runtime.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
