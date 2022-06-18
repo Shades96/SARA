@@ -336,6 +336,12 @@ int Return::parse(const Terminal& t)
 			return EXIT_SUCCESS;
 		}
 		else {
+			auto err = expr.parse(t);
+			if (expr.isComplete()) {
+				complete = true;
+				Output::log() << "Return statement complete\n";
+				return EXIT_SUCCESS;
+			}
 			Output::error() << "Unexpected '" << Terminal::KIND_NAMES[t.kind] << "' - expected expression\n";
 			return EXIT_FAILURE;
 		}
@@ -431,7 +437,11 @@ int Definition::parse(const Terminal& t)
 		}
 	}
 
-	return expr.parse(t);
+	auto err = expr.parse(t);
+	if (expr.isComplete()) {
+		return EXIT_SUCCESS;
+	}
+	return err;
 }
 
 int Assignment::parse(const Terminal& t)
@@ -470,7 +480,11 @@ int Assignment::parse(const Terminal& t)
 		}
 	}
 
-	return expr.parse(t);
+	auto err = expr.parse(t);
+	if (expr.isComplete()) {
+		return EXIT_SUCCESS;
+	}
+	return err;
 }
 
 int Block::parse(const Terminal& t)
