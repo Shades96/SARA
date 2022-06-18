@@ -103,7 +103,6 @@ int Term::parse(const Terminal& t)
 	return EXIT_FAILURE;
 }
 
-// TODO
 int Expression::parse(const Terminal& t)
 {
 	if (empty) {
@@ -248,7 +247,6 @@ int LExpression::parse(const Terminal& t)
 	return EXIT_FAILURE;
 }
 
-// TODO: handle nested parens
 int Call::parse(const Terminal& t)
 {
 	if (empty) {
@@ -468,7 +466,6 @@ int Assignment::parse(const Terminal& t)
 			return EXIT_SUCCESS;
 		}
 		else {
-			// TODO: parse again
 			auto err = expr.parse(t);
 			if (expr.isComplete()) {
 				Output::log() << "Assignment statement complete\n";
