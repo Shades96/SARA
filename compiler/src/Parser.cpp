@@ -348,9 +348,14 @@ int Return::parse(const Terminal& t)
 		}
 		break;
 	default:
-		return expr.parse(t);
 		break;
 	}
+
+	auto err = expr.parse(t);
+	if (expr.isComplete()) {
+		return EXIT_SUCCESS;
+	}
+	return err;
 }
 
 int Branch::parse(const Terminal& t)
@@ -390,7 +395,15 @@ int Loop::parse(const Terminal& t)
 	}
 
 	if (!cond.isComplete()) {
-		return cond.parse(t);
+		// TODO catch
+		auto err = cond.parse(t);
+		if (cond.isComplete()) {
+			if (err) {
+				return this->parse(t);
+			}
+			return EXIT_SUCCESS;
+		}
+		return err;
 	}
 
 	auto err = block.parse(t);
@@ -433,8 +446,14 @@ int Definition::parse(const Terminal& t)
 			return EXIT_SUCCESS;
 		}
 		else {
+			auto err = expr.parse(t);
+			if (expr.isComplete()) {
+				Output::log() << "Definition statement complete\n";
+				complete = true;
+				return EXIT_SUCCESS;
+			}
 			Output::error() << "Unexpected '" << Terminal::KIND_NAMES[t.kind] << "' - expected expression\n";
-			return EXIT_FAILURE;
+			return err;
 		}
 	}
 
