@@ -1,10 +1,13 @@
 # AM22
 Abstrakte Maschinen Projekt SS-2022
 
--------------
-Language Spec
--------------
--------------
+-----------
+-----------
+## Compiler
+-----------
+
+### Language Spec
+-----------------
 
     // Program
     Program: { Def ';' }
@@ -48,18 +51,33 @@ Language Spec
         ;
 
 ---------------------------
-Built-ins/Special functions
----------------------------
+### Built-ins/Special functions
 ---------------------------
 
-print()
-read()
-main()
+- print(): Prints the result of an expression to the console.
+- read(): Reads input from the console and return it.
+- exit(): Terminates the program.
+- main(): Program entry point - must be defined.
 
----------------
-Instruction set
----------------
----------------
+----------
+----------
+## Runtime
+----------
+
+- Function parameters and locals reside on the stack
+- Instruction operands index the stack
+
+When a function is called, save a function stack frame ptr (fsfp) and save parameters on the stack.
+- Within a function block, all references are relative to the fsfp.
+- On return, invalidate everything past the sfp.
+
+When a regular block is entered, save a block stack frame ptr (bsfp).
+- Within a regular block, all references are STILL relative to the fsfp.
+- On leaving the block, invalidate everything past the bsfp.
+
+-------------------
+### Instruction set
+-------------------
 
     // Arithmetic
     Neg  <op1>
@@ -92,12 +110,4 @@ Instruction set
     Ret  <op1>
     Jmp  <op1> <op2>
 
--------
-Runtime
--------
--------
-
-Function parameters and locals on the stack
-Instruction operands index the stack
-When a new block/function is entered, save a 'stack frame ptr',
-    on leaving the block, invalidate everything past that ptr
+-------------------

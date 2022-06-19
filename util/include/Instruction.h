@@ -7,15 +7,19 @@
 using std::vector;
 
 struct Instruction;
+using word = long;
+using stack = vector<word>;
 using instr_seq = vector<std::shared_ptr<Instruction>>;
 using instr_ptr = instr_seq::size_type;
-using word = long;
+using stack_ptr = stack::size_type;
 
 struct ExecContext
 {
-    instr_seq	 instrs;
-    instr_ptr	 ip;
-    vector<word> stack;
+    stack               stack;      // program stack
+    stack_ptr           fsfp;       // function stack frame pointer
+    vector<stack_ptr>   bsfp;       // stack of block stack frame pointers
+    instr_seq	        instrs;     // instruction sequence
+    instr_ptr	        ip;         // instruction pointer
 };
 
 enum ExecStatus {

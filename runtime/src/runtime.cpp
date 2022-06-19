@@ -9,7 +9,7 @@ int Runtime::run()
     return status;
 }
 
-vector<std::shared_ptr<Instruction>> Instruction::fromBytecode(std::istream& in) 
+instr_seq Instruction::fromBytecode(std::istream& in) 
 {
     vector<std::shared_ptr<Instruction>> result;
     char op;
