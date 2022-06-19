@@ -48,6 +48,8 @@ struct Terminal
 		kind(SLASH_SLASH)
 	{}
 	Kind kind;
+	long value = -1;
+	string id = "";
 	static const int MAX_IDENTIFIER_LEN;
 	static const vector<string> KIND_MATCHERS;
 	static const vector<string> KIND_NAMES;

@@ -46,6 +46,12 @@ int Scanner::lex(std::istream& input, std::function<int(Terminal)> outputToken)
 
                         Terminal found((Terminal::Kind)t);
                         if (t != Terminal::Kind::SLASH_SLASH) {
+                            if (t == Terminal::Kind::IDENTIFIER) {
+                                found.id = match[0].str();
+                            }
+                            else if (t == Terminal::Kind::NUMBER) {
+                                found.value = std::stol(match[0].str());
+                            }
                             parseError = outputToken(found);
                         }
 

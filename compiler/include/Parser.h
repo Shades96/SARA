@@ -1,14 +1,14 @@
 #pragma once
 
 #include "NonTerminal.h"
-#include "Scanner.h"
 
 class Parser
 {
 public:
-	int parse(Terminal &token);
+	int parse(Terminal& token);
 
 private:
 	Program program;
+	ProgramContext context;
 	std::vector<Terminal> tokens;
 };

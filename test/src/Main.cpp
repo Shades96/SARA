@@ -3,6 +3,7 @@
 #include <sstream>
 #include <filesystem>
 
+#include "Scanner.h"
 #include "Parser.h"
 #include "Output.h"
 #include "Instruction.h"
