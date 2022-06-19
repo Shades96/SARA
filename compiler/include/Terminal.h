@@ -16,6 +16,7 @@ struct Terminal
 		PLUS,
 		STAR,
 		SLASH,
+		PERCENT,
 		AND_AND,
 		OR_OR,
 		LESS_THAN,

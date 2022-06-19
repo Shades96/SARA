@@ -6,8 +6,6 @@ Language Spec
 -------------
 -------------
 
-    // Mod?
-
     // Program
     Program: { Def ';' }
            ;
@@ -39,7 +37,7 @@ Language Spec
 
     Expr: Term
         | ( '!' | '-' ) Term
-        | Term ( '+' | '-' | '*' | '/' | '&&' | '||' | '<' | '==' | '>' ) Term
+        | Term ( '+' | '-' | '*' | '/' | '%' | '&&' | '||' | '<' | '==' | '>' ) Term
         ;
     
     Term: num

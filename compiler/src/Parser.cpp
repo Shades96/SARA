@@ -178,6 +178,9 @@ int Expression::parse(const Terminal& t)
 	case Terminal::Kind::SLASH:
 		kind = DIVISION;
 		break;
+	case Terminal::Kind::PERCENT:
+		kind = MODULO;
+		break;
 	case Terminal::Kind::AND_AND:
 		kind = CONJUNCTION;
 		break;
