@@ -1,5 +1,11 @@
 #pragma once
 
-#include <vector>
+#include "Instruction.h"
 
-using std::vector;
+class Runtime
+{
+	ExecContext context;
+	ExecStatus status = ExecStatus::SUCCESS;
+public:
+	int run();
+};

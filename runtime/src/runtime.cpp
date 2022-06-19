@@ -1,6 +1,13 @@
 #include "Runtime.h"
 #include "Output.h"
-#include "Instruction.h"
+
+int Runtime::run()
+{
+    while (status == ExecStatus::SUCCESS) {
+        status = context.instrs[context.ip]->exec(context);
+    }
+    return status;
+}
 
 vector<std::shared_ptr<Instruction>> Instruction::fromBytecode(std::istream& in) 
 {
@@ -86,27 +93,90 @@ vector<std::shared_ptr<Instruction>> Instruction::fromBytecode(std::istream& in)
 }
 
 // TODO
-void Neg::exec() {}
-void Add::exec() {}
-void Sub::exec() {}
-void Mul::exec() {}
-void Div::exec() {}
-void Mod::exec() {}
-void Gt::exec() {}
-void Lt::exec() {}
-void Eq::exec() {}
-void Neq::exec() {}
-void Geq::exec() {}
-void Leq::exec() {}
-void Not::exec() {}
-void And::exec() {}
-void Or::exec() {}
-void Pop::exec() {}
-void Push::exec() {}
-void Exit::exec() {}
-void Call::exec() {}
-void Ret::exec() {}
-void Jmp::exec() {}
+ExecStatus Neg::exec(ExecContext &context) {
+	return ExecStatus::FAIL;
+}
+
+ExecStatus Add::exec(ExecContext &context) {
+	return ExecStatus::FAIL;
+}
+
+ExecStatus Sub::exec(ExecContext &context) {
+	return ExecStatus::FAIL;
+}
+
+ExecStatus Mul::exec(ExecContext &context) {
+	return ExecStatus::FAIL;
+}
+
+ExecStatus Div::exec(ExecContext &context) {
+	return ExecStatus::FAIL;
+}
+
+ExecStatus Mod::exec(ExecContext &context) {
+	return ExecStatus::FAIL;
+}
+
+ExecStatus Gt::exec(ExecContext &context) {
+	return ExecStatus::FAIL;
+}
+
+ExecStatus Lt::exec(ExecContext &context) {
+	return ExecStatus::FAIL;
+}
+
+ExecStatus Eq::exec(ExecContext &context) {
+	return ExecStatus::FAIL;
+}
+
+ExecStatus Neq::exec(ExecContext &context) {
+	return ExecStatus::FAIL;
+}
+
+ExecStatus Geq::exec(ExecContext &context) {
+	return ExecStatus::FAIL;
+}
+
+ExecStatus Leq::exec(ExecContext &context) {
+	return ExecStatus::FAIL;
+}
+
+ExecStatus Not::exec(ExecContext &context) {
+	return ExecStatus::FAIL;
+}
+
+ExecStatus And::exec(ExecContext &context) {
+	return ExecStatus::FAIL;
+}
+
+ExecStatus Or::exec(ExecContext &context) {
+	return ExecStatus::FAIL;
+}
+
+ExecStatus Pop::exec(ExecContext &context) {
+	return ExecStatus::FAIL;
+}
+
+ExecStatus Push::exec(ExecContext &context) {
+	return ExecStatus::FAIL;
+}
+
+ExecStatus Exit::exec(ExecContext &context) {
+	return ExecStatus::FAIL;
+}
+
+ExecStatus Call::exec(ExecContext &context) {
+	return ExecStatus::FAIL;
+}
+
+ExecStatus Ret::exec(ExecContext &context) {
+	return ExecStatus::FAIL;
+}
+
+ExecStatus Jmp::exec(ExecContext &context) {
+	return ExecStatus::FAIL;
+}
+
 
 // TODO
 void Neg::parse(std::istream& in) {}
