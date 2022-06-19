@@ -1,0 +1,17 @@
+main() {
+    return fib(10);
+}
+
+fib(n) {
+    if n < 3 { return 1; }
+    let i = 2;
+    let curr = 1;
+    let last = 1;
+    while i < n {
+        let tmp = curr;
+        curr = curr + last;
+        last = tmp;
+        i = i + 1;
+    }
+    return curr;
+}

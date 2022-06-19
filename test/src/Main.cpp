@@ -53,7 +53,7 @@ int main()
             Output::log() << SEP;
 
             std::ifstream bytecodeStream{ bytecodePath };
-            vector<Instruction> instructions = Instruction::fromBytecode(bytecodeStream);
+            vector<std::shared_ptr<Instruction>> instructions = Instruction::fromBytecode(bytecodeStream);
 
             Output::log() << SEP;
         }

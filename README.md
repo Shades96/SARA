@@ -49,6 +49,15 @@ Language Spec
         | '(' Expr ')'
         ;
 
+---------------------------
+Built-ins/Special functions
+---------------------------
+---------------------------
+
+print()
+read()
+main()
+
 ---------------
 Instruction set
 ---------------
@@ -85,4 +94,12 @@ Instruction set
     Ret  <op1>
     Jmp  <op1> <op2>
 
----------------
+-------
+Runtime
+-------
+-------
+
+Function parameters and locals on the stack
+Instruction operands index the stack
+When a new block/function is entered, save a 'stack frame ptr',
+    on leaving the block, invalidate everything past that ptr
