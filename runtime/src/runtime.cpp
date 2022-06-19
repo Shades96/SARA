@@ -69,8 +69,14 @@ instr_seq Instruction::fromBytecode(std::istream& in)
         case Instruction::Opcode::PUSH:
             result.push_back(std::make_shared<Push>());
             break;
+        case Instruction::Opcode::ENTR:
+            result.push_back(std::make_shared<Enter>());
+            break;
         case Instruction::Opcode::EXIT:
             result.push_back(std::make_shared<Exit>());
+            break;
+        case Instruction::Opcode::KILL:
+            result.push_back(std::make_shared<Kill>());
             break;
         case Instruction::Opcode::CALL:
             result.push_back(std::make_shared<Call>());
@@ -161,8 +167,16 @@ ExecStatus Push::exec(ExecContext &context) {
 	return ExecStatus::FAIL;
 }
 
-ExecStatus Exit::exec(ExecContext &context) {
+ExecStatus Enter::exec(ExecContext &context) {
 	return ExecStatus::FAIL;
+}
+
+ExecStatus Exit::exec(ExecContext& context) {
+    return ExecStatus::FAIL;
+}
+
+ExecStatus Kill::exec(ExecContext& context) {
+    return ExecStatus::FAIL;
 }
 
 ExecStatus Call::exec(ExecContext &context) {
@@ -196,7 +210,9 @@ void And::parse(std::istream& in) {}
 void Or::parse(std::istream& in) {}
 void Pop::parse(std::istream& in) {}
 void Push::parse(std::istream& in) {}
+void Enter::parse(std::istream& in) {}
 void Exit::parse(std::istream& in) {}
+void Kill::parse(std::istream& in) {}
 void Call::parse(std::istream& in) {}
 void Ret::parse(std::istream& in) {}
 void Jmp::parse(std::istream& in) {}

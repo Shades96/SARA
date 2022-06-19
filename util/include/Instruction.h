@@ -54,11 +54,13 @@ struct Instruction
         OR,     // <op1> <op2>
 
         // Stack
-        POP,    // <op1>
+        POP,    //
         PUSH,   // <op1>
 
-        // Control
-        EXIT,   // 
+        // Flow control
+        ENTR,   //
+        EXIT,   //
+        KILL,   //
         CALL,   // <op1>
         RET,    // <op1>
         JMP,    // <op1> <op2>
@@ -174,11 +176,23 @@ struct Push : public Instruction
 	ExecStatus exec(ExecContext &context) override;
 	void parse(std::istream& in) override;
 };
+struct Enter : public Instruction
+{
+    Enter() : Instruction(Opcode::ENTR) {}
+	ExecStatus exec(ExecContext &context) override;
+	void parse(std::istream& in) override;
+};
 struct Exit : public Instruction
 {
     Exit() : Instruction(Opcode::EXIT) {}
-	ExecStatus exec(ExecContext &context) override;
-	void parse(std::istream& in) override;
+    ExecStatus exec(ExecContext& context) override;
+    void parse(std::istream& in) override;
+};
+struct Kill : public Instruction
+{
+    Kill() : Instruction(Opcode::KILL) {}
+    ExecStatus exec(ExecContext& context) override;
+    void parse(std::istream& in) override;
 };
 struct Call : public Instruction
 {

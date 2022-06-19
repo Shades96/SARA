@@ -55,8 +55,8 @@ Abstrakte Maschinen Projekt SS-2022
 ---------------------------
 
 - print(): Prints the result of an expression to the console.
-- read(): Reads input from the console and return it.
-- exit(): Terminates the program.
+- read(): Reads input from the console and returns it.
+- kill(): Terminates the program.
 - main(): Program entry point - must be defined.
 
 ----------
@@ -105,7 +105,9 @@ When a regular block is entered, save a block stack frame ptr (bsfp).
     Push <op1>
 
     // Control
+    Entr
     Exit
+    Kill
     Call <op1>
     Ret  <op1>
     Jmp  <op1> <op2>
