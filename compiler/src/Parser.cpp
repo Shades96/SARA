@@ -4,7 +4,7 @@
 
 #include <iostream>
 
-int BracketPair::parse(const Terminal& t, ProgramContext& context) 
+int BracketPair::parse(const Terminal& t, BlockContext context) 
 {
 	if (t.kind == T_OPEN) {
 		if (empty) {
@@ -27,7 +27,7 @@ int BracketPair::parse(const Terminal& t, ProgramContext& context)
 	return EXIT_FAILURE;
 }
 
-int Term::parse(const Terminal& t, ProgramContext& context)
+int Term::parse(const Terminal& t, BlockContext context)
 {
 	if (empty) {
 		empty = false;
@@ -104,7 +104,7 @@ int Term::parse(const Terminal& t, ProgramContext& context)
 	return EXIT_FAILURE;
 }
 
-int Expression::parse(const Terminal& t, ProgramContext& context)
+int Expression::parse(const Terminal& t, BlockContext context)
 {
 	if (empty) {
 		empty = false;
@@ -206,7 +206,7 @@ int Expression::parse(const Terminal& t, ProgramContext& context)
 	return EXIT_SUCCESS;
 }
 
-int LExpression::parse(const Terminal& t, ProgramContext& context)
+int LExpression::parse(const Terminal& t, BlockContext context)
 {
 	if (empty) {
 		if (t.kind != Terminal::Kind::IDENTIFIER) {
@@ -251,7 +251,7 @@ int LExpression::parse(const Terminal& t, ProgramContext& context)
 	return EXIT_FAILURE;
 }
 
-int FunctionCall::parse(const Terminal& t, ProgramContext& context)
+int FunctionCall::parse(const Terminal& t, BlockContext context)
 {
 	if (empty) {
 		if (t.kind != Terminal::Kind::IDENTIFIER) {
@@ -319,7 +319,7 @@ int FunctionCall::parse(const Terminal& t, ProgramContext& context)
 	return err;
 }
 
-int Return::parse(const Terminal& t, ProgramContext& context)
+int Return::parse(const Terminal& t, BlockContext context)
 {
 	switch (t.kind) {
 	case Terminal::Kind::RETURN:
@@ -359,7 +359,7 @@ int Return::parse(const Terminal& t, ProgramContext& context)
 	return err;
 }
 
-int Branch::parse(const Terminal& t, ProgramContext& context)
+int Branch::parse(const Terminal& t, BlockContext context)
 {
 	if (empty) {
 		if (t.kind != Terminal::Kind::IF) {
@@ -375,15 +375,15 @@ int Branch::parse(const Terminal& t, ProgramContext& context)
 		return cond.parse(t, context);
 	}
 
-	auto err = block.parse(t, context);
-	if (block.isComplete()) {
+	auto err = body.parse(t, context);
+	if (body.isComplete()) {
 		Output::log() << "Branch statement complete\n";
 		complete = true;
 	}
 	return err;
 }
 
-int Loop::parse(const Terminal& t, ProgramContext& context)
+int Loop::parse(const Terminal& t, BlockContext context)
 {
 	if (empty) {
 		if (t.kind != Terminal::Kind::WHILE) {
@@ -407,15 +407,15 @@ int Loop::parse(const Terminal& t, ProgramContext& context)
 		return err;
 	}
 
-	auto err = block.parse(t, context);
-	if (block.isComplete()) {
+	auto err = body.parse(t, context);
+	if (body.isComplete()) {
 		Output::log() << "Loop statement complete\n";
 		complete = true;
 	}
 	return err;
 }
 
-int Definition::parse(const Terminal& t, ProgramContext& context)
+int Definition::parse(const Terminal& t, BlockContext context)
 {
 	if (!expectedExpr) {
 		if (t.kind != expectedTerm) {
@@ -465,7 +465,7 @@ int Definition::parse(const Terminal& t, ProgramContext& context)
 	return err;
 }
 
-int Assignment::parse(const Terminal& t, ProgramContext& context)
+int Assignment::parse(const Terminal& t, BlockContext context)
 {
 	if (!lexpr.isComplete()) {
 		auto err = lexpr.parse(t, context);
@@ -507,10 +507,10 @@ int Assignment::parse(const Terminal& t, ProgramContext& context)
 	return err;
 }
 
-int Block::parse(const Terminal& t, ProgramContext& context)
+int Block::parse(const Terminal& t, BlockContext context)
 {
 	if (nestingDepth == 0) {
-		auto err = delim.parse(t, context);
+		auto err = delim.parse(t, this->context);
 		if (empty) {
 			empty = false;
 			return err;
@@ -540,16 +540,16 @@ int Block::parse(const Terminal& t, ProgramContext& context)
 			stmts.push_back(std::make_unique<Return>());
 			break;
 		case Terminal::Kind::IF:
-			stmts.push_back(std::make_unique<Branch>());
+			stmts.push_back(std::make_unique<Branch>(this->context));
 			break;
 		case Terminal::Kind::WHILE:
-			stmts.push_back(std::make_unique<Loop>());
+			stmts.push_back(std::make_unique<Loop>(this->context));
 			break;
 		case Terminal::Kind::LET:
 			stmts.push_back(std::make_unique<Definition>());
 			break;
 		case Terminal::Kind::CURLY_OPEN:
-			stmts.push_back(std::make_unique<Block>());
+			stmts.push_back(std::make_unique<Block>(this->context));
 			break;
 		case Terminal::Kind::IDENTIFIER:
 			// could be Assignment or function call
@@ -570,19 +570,19 @@ int Block::parse(const Terminal& t, ProgramContext& context)
 		}
 	}
 
-	auto err = stmts.back()->parse(t, context);
+	auto err = stmts.back()->parse(t, this->context);
 	if (err && lookaheadBuf.size()) {
 		stmts.pop_back();
 		stmts.push_back(std::make_unique<FunctionCall>());
-		err = stmts.back()->parse(lookaheadBuf[0], context);
+		err = stmts.back()->parse(lookaheadBuf[0], this->context);
 		if (err) return err;
-		return stmts.back()->parse(t, context);
+		return stmts.back()->parse(t, this->context);
 	}
 	return err;
 }
 
 const Terminal::Kind ParameterList::SEPARATOR = Terminal::Kind::COMMA;
-int ParameterList::parse(const Terminal& t, ProgramContext& context)
+int ParameterList::parse(const Terminal& t, BlockContext context)
 {
 	auto err = delim.parse(t, context);
 	if (empty) {
@@ -613,7 +613,10 @@ int ParameterList::parse(const Terminal& t, ProgramContext& context)
 			return EXIT_FAILURE;
 		}
 		idExpected = false;
-		params.push_back("param"); // TODO: save actual name
+		context->variables.insert(std::make_pair(t.id, Variable {
+			Variable::Kind::PARAMETER, params.size()
+		}));
+		params.push_back(t.id);
 		return EXIT_SUCCESS;
 		break;
 	default:
@@ -623,7 +626,7 @@ int ParameterList::parse(const Terminal& t, ProgramContext& context)
 	}
 }
 
-int Function::parse(const Terminal& t, ProgramContext& context)
+int Function::parse(const Terminal& t, BlockContext context)
 {
 	if (empty) {
 		if (t.kind != Terminal::Kind::IDENTIFIER) {
@@ -638,27 +641,31 @@ int Function::parse(const Terminal& t, ProgramContext& context)
 		return params.parse(t, context);
 	}
 
-	auto err = body.parse(t, context);
-	if (body.isComplete()) {
+	if (!body) {
+		body = std::make_unique<Block>(context);
+	}
+
+	auto err = body->parse(t, context);
+	if (body->isComplete()) {
 		Output::log() << "Function definition complete\n";
 		complete = true;
 	}
 	return err;
 }
 
-int Program::parse(const Terminal& t, ProgramContext& context)
+int Program::parse(const Terminal& t)
 {
 	if (functions.empty()) {
 		functions.push_back(Function{});
 	}
-	auto err = functions.back().parse(t, context);
+	auto err = functions.back().parse(t, functions.back().context);
 	if (functions.back().isComplete()) {
 		functions.pop_back();
 	}
 	return err;
 }
 
-int Parser::parse(Terminal& token)
+int Parser::parse(const Terminal& token)
 {
-	return program.parse(token, context);
+	return program.parse(token);
 }

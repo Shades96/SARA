@@ -5,10 +5,9 @@
 class Parser
 {
 public:
-	int parse(Terminal& token);
+	int parse(const Terminal& token);
 
 private:
 	Program program;
-	ProgramContext context;
 	std::vector<Terminal> tokens;
 };
