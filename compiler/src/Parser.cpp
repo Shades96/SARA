@@ -429,6 +429,10 @@ int Definition::parse(const Terminal& t, BlockContext context)
 			break;
 		case Terminal::Kind::IDENTIFIER:
 			expectedTerm = Terminal::Kind::EQUALS;
+			context->variables.insert(std::make_pair(t.id, Variable {
+				Variable::Kind::LOCAL, context->variables.size()
+			}));
+			varName = t.id;
 			break;
 		case Terminal::Kind::EQUALS:
 			expectedExpr = true;
@@ -441,21 +445,16 @@ int Definition::parse(const Terminal& t, BlockContext context)
 	}
 
 	if (t.kind == Terminal::Kind::SEMICOLON) {
+		if (!expr.isComplete()) {
+			auto err = expr.parse(t, context);
+		}
 		if (expr.isComplete()) {
 			Output::log() << "Definition statement complete\n";
 			complete = true;
 			return EXIT_SUCCESS;
 		}
-		else {
-			auto err = expr.parse(t, context);
-			if (expr.isComplete()) {
-				Output::log() << "Definition statement complete\n";
-				complete = true;
-				return EXIT_SUCCESS;
-			}
-			Output::error() << "Unexpected '" << Terminal::KIND_NAMES[t.kind] << "' - expected expression\n";
-			return err;
-		}
+		Output::error() << "Unexpected '" << Terminal::KIND_NAMES[t.kind] << "' - expected expression\n";
+		return EXIT_FAILURE;
 	}
 
 	auto err = expr.parse(t, context);
@@ -483,21 +482,16 @@ int Assignment::parse(const Terminal& t, BlockContext context)
 	}
 
 	if (t.kind == Terminal::Kind::SEMICOLON) {
+		if (!expr.isComplete()) {
+			auto err = expr.parse(t, context);
+		}
 		if (expr.isComplete()) {
 			Output::log() << "Assignment statement complete\n";
 			complete = true;
 			return EXIT_SUCCESS;
 		}
-		else {
-			auto err = expr.parse(t, context);
-			if (expr.isComplete()) {
-				Output::log() << "Assignment statement complete\n";
-				complete = true;
-				return EXIT_SUCCESS;
-			}
-			Output::error() << "Unexpected '" << Terminal::KIND_NAMES[t.kind] << "' - expected expression\n";
-			return EXIT_FAILURE;
-		}
+		Output::error() << "Unexpected '" << Terminal::KIND_NAMES[t.kind] << "' - expected expression\n";
+		return EXIT_FAILURE;
 	}
 
 	auto err = expr.parse(t, context);

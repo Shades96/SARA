@@ -17,6 +17,7 @@ struct Variable
 		LOCAL
 	} kind;
 	Variable(Kind kind, size_t stackLocation) : kind(kind), stackLocation(stackLocation) {}
+	Variable() : kind(Kind::LOCAL), stackLocation(0) {}
 };
 
 template <typename Data>
@@ -193,8 +194,9 @@ public:
 	int parse(const Terminal& t, BlockContext context) override;
 	Definition() : Statement(Kind::DEFINITION) {};
 private:
-	Terminal::Kind expectedTerm = Terminal::Kind::LET;
 	bool expectedExpr = false;
+	Terminal::Kind expectedTerm = Terminal::Kind::LET;
+	string varName;
 	Expression expr;
 };
 
