@@ -1,71 +1,87 @@
 #include "Compiler.h"
 
-int Expression::compile()
+int Expression::compile(BlockContext context)
 {
 	return EXIT_SUCCESS;
 }
 
-int LExpression::compile()
+int LExpression::compile(BlockContext context)
 {
 	return EXIT_SUCCESS;
 }
 
-int FunctionCall::compile()
+int FunctionCall::compile(BlockContext context)
 {
 	return EXIT_SUCCESS;
 }
 
-int Term::compile()
+int Term::compile(BlockContext context)
 {
 	return EXIT_SUCCESS;
 }
 
-int Block::compile()
+int Block::compile(BlockContext context)
+{
+	Output::code() << Enter{ };
+	for (auto& stmt : stmts) {
+		auto err = stmt->compile(this->context);
+		if (err) return err;
+	}
+	Output::code() << Exit{ };
+	return EXIT_SUCCESS;
+}
+
+int Return::compile(BlockContext context)
+{
+	auto err = expr.compile(context);
+	if (err) return err;
+	Output::code() << Ret{ };
+	return EXIT_SUCCESS;
+}
+
+int Branch::compile(BlockContext context)
+{
+	auto err = cond.compile(context);
+	if (err) return err;
+	Output::code() << Ret{ };
+	return EXIT_SUCCESS;
+}
+
+int Loop::compile(BlockContext context)
 {
 	return EXIT_SUCCESS;
 }
 
-int Return::compile()
+int Definition::compile(BlockContext context)
 {
 	return EXIT_SUCCESS;
 }
 
-int Branch::compile()
+int Assignment::compile(BlockContext context)
 {
 	return EXIT_SUCCESS;
 }
 
-int Loop::compile()
+int Function::compile(BlockContext context)
 {
-	return EXIT_SUCCESS;
-}
-
-int Definition::compile()
-{
-	return EXIT_SUCCESS;
-}
-
-int Assignment::compile()
-{
-	return EXIT_SUCCESS;
-}
-
-int Function::compile()
-{
-	return EXIT_SUCCESS;
+	return body->compile(this->context);
 }
 
 int Program::compile()
 {
+	for (auto& f : functions) {
+		auto err = f.compile(f.context);
+		if (err) return err;
+	}
 	return EXIT_SUCCESS;
 }
 
-int BracketPair::compile()
+int BracketPair::compile(BlockContext context)
 {
 	return EXIT_SUCCESS;
 }
 
-int ParameterList::compile()
+int ParameterList::compile(BlockContext context)
 {
 	return EXIT_SUCCESS;
 }

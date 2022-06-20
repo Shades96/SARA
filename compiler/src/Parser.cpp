@@ -260,6 +260,7 @@ int FunctionCall::parse(const Terminal& t, BlockContext context)
 		}
 		empty = false;
 		expectedParams = true;
+		funName = t.id;
 		return EXIT_SUCCESS;
 	}
 	
@@ -287,6 +288,10 @@ int FunctionCall::parse(const Terminal& t, BlockContext context)
 				auto err = params.back().parse(t, context);
 			}
 			if (params.empty() || params.back().isComplete()) {
+				if (context->functionRefs.find(funName) == context->functionRefs.end()) {
+					// TODO: check that assigned size is correct
+					context->functionRefs[funName] = context->functionRefs.size();
+				}
 				Output::debug() << "Call statement complete\n";
 				complete = true;
 				return EXIT_SUCCESS;
@@ -649,13 +654,10 @@ int Function::parse(const Terminal& t, BlockContext context)
 
 int Program::parse(const Terminal& t)
 {
-	if (functions.empty()) {
-		functions.push_back(Function{});
+	if (functions.empty() || functions.back().isComplete()) {
+		functions.push_back(Function{ functionRefs });
 	}
 	auto err = functions.back().parse(t, functions.back().context);
-	if (functions.back().isComplete()) {
-		functions.pop_back();
-	}
 	return err;
 }
 

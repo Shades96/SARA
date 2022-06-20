@@ -23,18 +23,20 @@ struct Variable
 
 template <typename Data>
 using symbol_table = std::map<string, Data>;
+using function_table = symbol_table<size_t>;
 
-struct VariableData
+struct BlockData
 {
 	symbol_table<Variable> variables;
+	function_table functionRefs;
 };
-using BlockContext = std::shared_ptr<VariableData>;
+using BlockContext = std::shared_ptr<BlockData>;
 
 class NonTerminal
 {
 public: 
 	virtual int parse(const Terminal& t, BlockContext context) = 0;
-	virtual int compile() = 0;
+	virtual int compile(BlockContext context) = 0;
 	bool isEmpty() { return empty; }
 	bool isComplete() { return complete; }
 protected:
@@ -46,7 +48,7 @@ class BracketPair : public NonTerminal
 {
 public:
 	int parse(const Terminal& t, BlockContext context) override;
-	int compile() override;
+	int compile(BlockContext context) override;
 	BracketPair(Terminal::Kind T_OPEN, Terminal::Kind T_CLOSE)
 		: T_OPEN(T_OPEN), T_CLOSE(T_CLOSE) {}
 private:
@@ -57,7 +59,7 @@ class ParameterList : public NonTerminal
 {
 public:
 	int parse(const Terminal& t, BlockContext context) override;
-	int compile() override;
+	int compile(BlockContext context) override;
 private:
 	static const Terminal::Kind SEPARATOR;
 	BracketPair delim{ Terminal::Kind::PARENTHESIS_OPEN, Terminal::Kind::PARENTHESIS_CLOSE };
@@ -70,7 +72,7 @@ class Expression : public NonTerminal
 {
 public:
 	int parse(const Terminal& t, BlockContext context) override;
-	int compile() override;
+	int compile(BlockContext context) override;
 private:
 	enum Kind {
 		TERM,
@@ -94,7 +96,7 @@ class LExpression : public NonTerminal
 {
 public:
 	int parse(const Terminal& t, BlockContext context) override;
-	int compile() override;
+	int compile(BlockContext context) override;
 
 private:
 	enum Kind {
@@ -110,7 +112,7 @@ class Statement : public NonTerminal
 {
 public:
 	virtual int parse(const Terminal& t, BlockContext context) override = 0;
-	virtual int compile() override = 0;
+	virtual int compile(BlockContext context) override = 0;
 	enum Kind {
 		RETURN = 0,
 		BRANCH,
@@ -127,11 +129,12 @@ class FunctionCall : public Statement
 {
 public:
 	int parse(const Terminal& t, BlockContext context) override;
-	int compile() override;
+	int compile(BlockContext context) override;
 	FunctionCall() : Statement(Kind::FUNCTION_CALL) {};
 private:
 	int nestingDepth = 0;
 	bool expectedParams = false;
+	string funName = "";
 	vector<Expression> params;
 };
 
@@ -139,7 +142,7 @@ class Term : public NonTerminal
 {
 public:
 	int parse(const Terminal& t, BlockContext context) override;
-	int compile() override;
+	int compile(BlockContext context) override;
 	enum Kind {
 		NUMBER = 0,
 		REFERENCE,
@@ -158,7 +161,7 @@ class Block : public Statement
 {
 public:
 	int parse(const Terminal& t, BlockContext context) override;
-	int compile() override;
+	int compile(BlockContext context) override;
 	// make a copy of the outer scope and store it
 	Block(BlockContext outer) : Statement(Kind::BLOCK), 
 		context(std::make_shared<BlockContext::element_type>(*outer)) {};
@@ -174,7 +177,7 @@ class Return : public Statement
 {
 public:
 	int parse(const Terminal& t, BlockContext context) override;
-	int compile() override;
+	int compile(BlockContext context) override;
 	Return() : Statement(Kind::RETURN) {};
 private:
 	Expression expr;
@@ -184,7 +187,7 @@ class Branch : public Statement
 {
 public:
 	int parse(const Terminal& t, BlockContext context) override;
-	int compile() override;
+	int compile(BlockContext context) override;
 	Branch(BlockContext context) : Statement(Kind::BRANCH), body(context) {};
 private:
 	Expression cond;
@@ -195,7 +198,7 @@ class Loop : public Statement
 {
 public:
 	int parse(const Terminal& t, BlockContext context) override;
-	int compile() override;
+	int compile(BlockContext context) override;
 	Loop(BlockContext context) : Statement(Kind::LOOP), body(context) {};
 private:
 	Expression cond;
@@ -206,7 +209,7 @@ class Definition : public Statement
 {
 public:
 	int parse(const Terminal& t, BlockContext context) override;
-	int compile() override;
+	int compile(BlockContext context) override;
 	Definition() : Statement(Kind::DEFINITION) {};
 private:
 	bool expectedExpr = false;
@@ -219,7 +222,7 @@ class Assignment : public Statement
 {
 public:
 	int parse(const Terminal& t, BlockContext context) override;
-	int compile() override;
+	int compile(BlockContext context) override;
 	Assignment() : Statement(Kind::ASSIGNMENT) {};
 private:
 	bool expectedExpr = false;
@@ -231,8 +234,8 @@ class Function : public NonTerminal
 {
 public:
 	int parse(const Terminal& t, BlockContext context) override;
-	int compile() override;
-	Function() : context(std::make_shared<VariableData>()) {}
+	int compile(BlockContext context) override;
+	Function(std::shared_ptr<function_table> functionRefs) : context(std::make_shared<BlockData>()) {}
 	BlockContext context;
 private:
 	string name;
@@ -245,6 +248,7 @@ class Program
 public:
 	int parse(const Terminal& t);
 	int compile();
-private:
+	Program() : functionRefs(std::make_shared<function_table>()) {}
 	vector<Function> functions;
+	std::shared_ptr<function_table> functionRefs;
 };
