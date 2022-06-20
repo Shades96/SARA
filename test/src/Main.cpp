@@ -57,6 +57,7 @@ int main()
             Output::log() << SEP << "Compiling bytecode...\n";
 
             compiler.compile(parser.program);
+            Output::Bytecode::flush();
             Output::Bytecode::closeOutfile();
 
             Output::log() << SEP << "Running program...\n";

@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <string>
 #include <memory>
 
@@ -114,10 +115,26 @@ struct Output
 
 			auto bytes = instr.toBytes();
 			auto numBytes = instr.arity * sizeof(operand) + sizeof(operation);
-			out->write(bytes.data(), numBytes);
+			bufStack.back()->write(bytes.data(), numBytes);
 			return *this;
 		}
+		static void flush() {
+			if (inst().bufStack.size() != 1) {
+				Output::error() << "Buffer stack has not been initialized or flattened\n";
+				return;
+			}
+			*inst().out << inst().bufStack[0]->rdbuf();
+		}
+		static void push() {
+			inst().bufStack.push_back(std::make_shared<std::stringstream>());
+		}
+		static std::shared_ptr<std::stringstream> pop() {
+			auto top = inst().bufStack.back();
+			inst().bufStack.pop_back();
+			return top;
+		}
 	private:
+		vector<std::shared_ptr<std::stringstream>> bufStack { std::make_shared<std::stringstream>() };
 		std::shared_ptr<std::ofstream> out;
 	};
 	static Bytecode& code()
