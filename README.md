@@ -1,5 +1,6 @@
 # AM22
-Abstrakte Maschinen Projekt SS-2022
+
+> Abstrakte Maschinen Projekt SS-2022
 
 -----------
 -----------
@@ -73,7 +74,7 @@ When a function is called, save a function stack frame ptr (fsfp) and save param
 
 When a regular block is entered, save a block stack frame ptr (bsfp).
 - Within a regular block, all references are STILL relative to the fsfp.
-- On leaving the block, invalidate everything past the bsfp.
+- On leaving the block, invalidate everything past the last bsfp.
 
 -------------------
 ### Instruction set
@@ -101,15 +102,15 @@ When a regular block is entered, save a block stack frame ptr (bsfp).
     Or   <op1> <op2>
 
     // Stack
-    Pop  <op1>
-    Push <op1>
+    Pop  <dest>
+    Push <src>
 
     // Control
     Entr
     Exit
     Kill
-    Call <op1>
-    Ret  <op1>
-    Jmp  <op1> <op2>
+    Ret
+    Call <dest>
+    Jmp  <dest> <cond>
 
 -------------------

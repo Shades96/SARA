@@ -12,9 +12,11 @@ int Runtime::run()
 instr_seq Instruction::fromBytecode(std::istream& in) 
 {
     vector<std::shared_ptr<Instruction>> result;
-    char op;
-    while (in.good()) {
-        in.read(&op, 1);
+    operation op;
+    char tmp;
+    while (in.read(&tmp, 1).good()) {
+        // parse opcode
+        op = (operation) tmp;
         auto opcode = (Instruction::Opcode) op;
         switch (opcode)
         {
@@ -96,6 +98,16 @@ instr_seq Instruction::fromBytecode(std::istream& in)
         result.back()->parse(in);
     }
     return result;
+}
+
+void Instruction::parse(std::istream& in) {
+    // parse operands
+    for (int i = 0; i < arity; i++) {
+        OperandConversion converted;
+        in.read(&converted.bytes.b1, 1);
+        in.read(&converted.bytes.b2, 1);
+        operands.push_back(converted.o);
+    }
 }
 
 // TODO
@@ -190,29 +202,3 @@ ExecStatus Ret::exec(ExecContext &context) {
 ExecStatus Jmp::exec(ExecContext &context) {
 	return ExecStatus::FAIL;
 }
-
-
-// TODO
-void Neg::parse(std::istream& in) {}
-void Add::parse(std::istream& in) {}
-void Sub::parse(std::istream& in) {}
-void Mul::parse(std::istream& in) {}
-void Div::parse(std::istream& in) {}
-void Mod::parse(std::istream& in) {}
-void Gt::parse(std::istream& in) {}
-void Lt::parse(std::istream& in) {}
-void Eq::parse(std::istream& in) {}
-void Neq::parse(std::istream& in) {}
-void Geq::parse(std::istream& in) {}
-void Leq::parse(std::istream& in) {}
-void Not::parse(std::istream& in) {}
-void And::parse(std::istream& in) {}
-void Or::parse(std::istream& in) {}
-void Pop::parse(std::istream& in) {}
-void Push::parse(std::istream& in) {}
-void Enter::parse(std::istream& in) {}
-void Exit::parse(std::istream& in) {}
-void Kill::parse(std::istream& in) {}
-void Call::parse(std::istream& in) {}
-void Ret::parse(std::istream& in) {}
-void Jmp::parse(std::istream& in) {}

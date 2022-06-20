@@ -56,7 +56,9 @@ struct Output
 		}
 		Debug& operator<<(const string& str)
 		{
-			//std::cout << str;
+			#ifndef NDEBUG
+			std::cout << str;
+			#endif
 			return *this;
 		}
 	};
@@ -93,6 +95,11 @@ struct Output
 		{
 			inst().out = std::make_shared<std::ofstream>(filename, std::ios::binary | std::ios::out);
 		}
+		static void closeOutfile()
+		{
+			inst().out->close();
+			inst().out = nullptr;
+		}
 		static Bytecode& inst()
 		{
 			static Bytecode i;
@@ -105,11 +112,9 @@ struct Output
 				return *this;
 			}
 
-			out->write((char*) &instr.op, sizeof(instr.op));
-			for (auto operand : instr.operands) {
-				out->write((char*) &operand, sizeof(operand));
-			}
-
+			auto bytes = instr.toBytes();
+			auto numBytes = instr.arity * sizeof(operand) + sizeof(operation);
+			out->write(bytes.data(), numBytes);
 			return *this;
 		}
 	private:

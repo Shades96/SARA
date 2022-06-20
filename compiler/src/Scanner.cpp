@@ -16,7 +16,6 @@ int Scanner::lex(std::istream& input, std::function<int(Terminal)> outputToken)
     int lineNum = 1;
     std::regex eatWhitespace("[ \t\n]+");
     while (std::getline(input, wholeLine)) {
-        Output::debug() << wholeLine << "\n";
         remLine = wholeLine;
 
         while (remLine.length()) {
@@ -32,18 +31,11 @@ int Scanner::lex(std::istream& input, std::function<int(Terminal)> outputToken)
             int parseError = 0;
             for (int t = 0; t < Terminal::KIND_MATCHERS.size(); t++) {
                 const string& matchStr = Terminal::KIND_MATCHERS[t];
-				//Output::debug() << "Scanning '" << remLine << "' for '" << matchStr << "'...\n";
 				try {
 					std::regex tokenRegex(matchStr);
 					std::smatch match;
 					std::regex_search(remLine, match, tokenRegex);
 					if (match.size() && !match.prefix().length()) {
-                        Output::debug() << "Found " << Terminal::KIND_NAMES[t];
-                        if (t >= Terminal::Kind::NUMBER) {
-                            Output::debug() << " '" << match[0].str() << "'";
-                        }
-                        Output::debug() << "\n";
-
                         Terminal found((Terminal::Kind)t);
                         if (t != Terminal::Kind::SLASH_SLASH) {
                             if (t == Terminal::Kind::IDENTIFIER) {

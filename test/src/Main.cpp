@@ -5,6 +5,7 @@
 
 #include "Scanner.h"
 #include "Parser.h"
+#include "Compiler.h"
 #include "Output.h"
 #include "Instruction.h"
 
@@ -42,21 +43,28 @@ int main()
 
             Output::log() << SEP 
                 << file.path().string() << " > " << bytecodePath << "\n" << SEP
-                << strbuf.str() << "\n" << SEP;
+                << strbuf.str() << "\n";
 
             Scanner scanner;
             Parser parser;
-
+            Compiler compiler;
             auto parse = [&parser](Terminal t) { return parser.parse(t); };
+
+            Output::log() << SEP << "Parsing source...\n";
 
             scanner.lex(sourceStream, parse);
 
-            Output::log() << SEP;
+            Output::log() << SEP << "Compiling bytecode...\n";
+
+            compiler.compile(parser.program);
+            Output::Bytecode::closeOutfile();
+
+            Output::log() << SEP << "Running program...\n";
 
             std::ifstream bytecodeStream{ bytecodePath };
             vector<std::shared_ptr<Instruction>> instructions = Instruction::fromBytecode(bytecodeStream);
 
-            Output::log() << SEP;
+            Output::log() << SEP << "\n";
         }
     }
 }

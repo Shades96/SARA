@@ -287,7 +287,7 @@ int FunctionCall::parse(const Terminal& t, BlockContext context)
 				auto err = params.back().parse(t, context);
 			}
 			if (params.empty() || params.back().isComplete()) {
-				Output::log() << "Call statement complete\n";
+				Output::debug() << "Call statement complete\n";
 				complete = true;
 				return EXIT_SUCCESS;
 			}
@@ -334,14 +334,14 @@ int Return::parse(const Terminal& t, BlockContext context)
 	case Terminal::Kind::SEMICOLON:
 		if (expr.isComplete()) {
 			complete = true;
-			Output::log() << "Return statement complete\n";
+			Output::debug() << "Return statement complete\n";
 			return EXIT_SUCCESS;
 		}
 		else {
 			auto err = expr.parse(t, context);
 			if (expr.isComplete()) {
 				complete = true;
-				Output::log() << "Return statement complete\n";
+				Output::debug() << "Return statement complete\n";
 				return EXIT_SUCCESS;
 			}
 			Output::error() << "Unexpected '" << Terminal::KIND_NAMES[t.kind] << "' - expected expression\n";
@@ -377,7 +377,7 @@ int Branch::parse(const Terminal& t, BlockContext context)
 
 	auto err = body.parse(t, context);
 	if (body.isComplete()) {
-		Output::log() << "Branch statement complete\n";
+		Output::debug() << "Branch statement complete\n";
 		complete = true;
 	}
 	return err;
@@ -409,7 +409,7 @@ int Loop::parse(const Terminal& t, BlockContext context)
 
 	auto err = body.parse(t, context);
 	if (body.isComplete()) {
-		Output::log() << "Loop statement complete\n";
+		Output::debug() << "Loop statement complete\n";
 		complete = true;
 	}
 	return err;
@@ -449,7 +449,7 @@ int Definition::parse(const Terminal& t, BlockContext context)
 			auto err = expr.parse(t, context);
 		}
 		if (expr.isComplete()) {
-			Output::log() << "Definition statement complete\n";
+			Output::debug() << "Definition statement complete\n";
 			complete = true;
 			return EXIT_SUCCESS;
 		}
@@ -486,7 +486,7 @@ int Assignment::parse(const Terminal& t, BlockContext context)
 			auto err = expr.parse(t, context);
 		}
 		if (expr.isComplete()) {
-			Output::log() << "Assignment statement complete\n";
+			Output::debug() << "Assignment statement complete\n";
 			complete = true;
 			return EXIT_SUCCESS;
 		}
@@ -510,7 +510,7 @@ int Block::parse(const Terminal& t, BlockContext context)
 			return err;
 		}
 		if (delim.isComplete()) {
-			Output::log() << "Block statement complete\n";
+			Output::debug() << "Block statement complete\n";
 			complete = true;
 			if (stmts.empty() || stmts.back()->isComplete()) {
 				return EXIT_SUCCESS;
@@ -641,7 +641,7 @@ int Function::parse(const Terminal& t, BlockContext context)
 
 	auto err = body->parse(t, context);
 	if (body->isComplete()) {
-		Output::log() << "Function definition complete\n";
+		Output::debug() << "Function definition complete\n";
 		complete = true;
 	}
 	return err;

@@ -8,10 +8,19 @@ using std::vector;
 
 struct Instruction;
 using word = long;
+using operation = unsigned char;
+using operand = unsigned short;
 using stack = vector<word>;
 using instr_seq = vector<std::shared_ptr<Instruction>>;
 using instr_ptr = instr_seq::size_type;
 using stack_ptr = stack::size_type;
+
+union OperandConversion {
+    operand o;
+    struct Bytes {
+        char b1, b2;
+    } bytes;
+};
 
 struct ExecContext
 {
@@ -33,7 +42,7 @@ struct Instruction
 	enum Opcode 
 	{
         // Arithmetic
-        NEG,    // <op1>
+        NEG = 0,// <op1>
         ADD,    // <op1> <op2>
         SUB,    // <op1> <op2>
         MUL,    // <op1> <op2>
@@ -66,150 +75,130 @@ struct Instruction
         JMP,    // <op1> <op2>
 	} op;
 
-	vector<int> operands;
+    size_t arity = 0;
+	vector<operand> operands;
     virtual ExecStatus exec(ExecContext &context) = 0;
-    virtual void parse(std::istream& in) = 0;
+    void parse(std::istream& in);
 
     Instruction(Opcode op) : op(op) {}
-    static vector<std::shared_ptr<Instruction>> fromBytecode(std::istream& in);
+    Instruction(Opcode op, size_t arity) : op(op), arity(arity) {}
+    vector<char> toBytes() const;
+    static instr_seq fromBytecode(std::istream& in);
 };
 
 struct Neg : public Instruction
 {
-    Neg() : Instruction(Opcode::NEG) {}
+    Neg() : Instruction(Opcode::NEG, 1) {}
 	ExecStatus exec(ExecContext &context) override;
-    void parse(std::istream& in) override;
 };
 struct Add : public Instruction
 {
-    Add() : Instruction(Opcode::ADD) {}
+    Add() : Instruction(Opcode::ADD, 2) {}
 	ExecStatus exec(ExecContext &context) override;
-	void parse(std::istream& in) override;
 };
 struct Sub : public Instruction
 {
-    Sub() : Instruction(Opcode::SUB) {}
+    Sub() : Instruction(Opcode::SUB, 2) {}
 	ExecStatus exec(ExecContext &context) override;
-	void parse(std::istream& in) override;
 };
 struct Mul : public Instruction
 {
-    Mul() : Instruction(Opcode::MUL) {}
+    Mul() : Instruction(Opcode::MUL, 2) {}
 	ExecStatus exec(ExecContext &context) override;
-	void parse(std::istream& in) override;
 };
 struct Div : public Instruction
 {
-    Div() : Instruction(Opcode::DIV) {}
+    Div() : Instruction(Opcode::DIV, 2) {}
 	ExecStatus exec(ExecContext &context) override;
-	void parse(std::istream& in) override;
 };
 struct Mod : public Instruction
 {
-    Mod() : Instruction(Opcode::MOD) {}
+    Mod() : Instruction(Opcode::MOD, 2) {}
 	ExecStatus exec(ExecContext &context) override;
-	void parse(std::istream& in) override;
 };
 struct Gt : public Instruction
 {
-    Gt() : Instruction(Opcode::GT) {}
+    Gt() : Instruction(Opcode::GT, 2) {}
 	ExecStatus exec(ExecContext &context) override;
-	void parse(std::istream& in) override;
 };
 struct Lt : public Instruction
 {
-    Lt() : Instruction(Opcode::LT) {}
+    Lt() : Instruction(Opcode::LT, 2) {}
 	ExecStatus exec(ExecContext &context) override;
-	void parse(std::istream& in) override;
 };
 struct Eq : public Instruction
 {
-    Eq() : Instruction(Opcode::EQ) {}
+    Eq() : Instruction(Opcode::EQ, 2) {}
 	ExecStatus exec(ExecContext &context) override;
-	void parse(std::istream& in) override;
 };
 struct Neq : public Instruction
 {
-    Neq() : Instruction(Opcode::NEQ) {}
+    Neq() : Instruction(Opcode::NEQ, 2) {}
 	ExecStatus exec(ExecContext &context) override;
-	void parse(std::istream& in) override;
 };
 struct Geq : public Instruction
 {
-    Geq() : Instruction(Opcode::GEQ) {}
+    Geq() : Instruction(Opcode::GEQ, 2) {}
 	ExecStatus exec(ExecContext &context) override;
-	void parse(std::istream& in) override;
 };
 struct Leq : public Instruction
 {
-    Leq() : Instruction(Opcode::LEQ) {}
+    Leq() : Instruction(Opcode::LEQ, 2) {}
 	ExecStatus exec(ExecContext &context) override;
-	void parse(std::istream& in) override;
 };
 struct Not : public Instruction
 {
-    Not() : Instruction(Opcode::NOT) {}
+    Not() : Instruction(Opcode::NOT, 1) {}
 	ExecStatus exec(ExecContext &context) override;
-	void parse(std::istream& in) override;
 };
 struct And : public Instruction
 {
-    And() : Instruction(Opcode::AND) {}
+    And() : Instruction(Opcode::AND, 2) {}
 	ExecStatus exec(ExecContext &context) override;
-	void parse(std::istream& in) override;
 };
 struct Or : public Instruction
 {
-    Or() : Instruction(Opcode::OR) {}
+    Or() : Instruction(Opcode::OR, 2) {}
 	ExecStatus exec(ExecContext &context) override;
-	void parse(std::istream& in) override;
 };
 struct Pop : public Instruction
 {
-    Pop() : Instruction(Opcode::POP) {}
+    Pop() : Instruction(Opcode::POP, 1) {}
 	ExecStatus exec(ExecContext &context) override;
-	void parse(std::istream& in) override;
 };
 struct Push : public Instruction
 {
-    Push() : Instruction(Opcode::PUSH) {}
+    Push() : Instruction(Opcode::PUSH, 1) {}
 	ExecStatus exec(ExecContext &context) override;
-	void parse(std::istream& in) override;
 };
 struct Enter : public Instruction
 {
-    Enter() : Instruction(Opcode::ENTR) {}
+    Enter() : Instruction(Opcode::ENTR, 0) {}
 	ExecStatus exec(ExecContext &context) override;
-	void parse(std::istream& in) override;
 };
 struct Exit : public Instruction
 {
-    Exit() : Instruction(Opcode::EXIT) {}
+    Exit() : Instruction(Opcode::EXIT, 0) {}
     ExecStatus exec(ExecContext& context) override;
-    void parse(std::istream& in) override;
 };
 struct Kill : public Instruction
 {
-    Kill() : Instruction(Opcode::KILL) {}
+    Kill() : Instruction(Opcode::KILL, 0) {}
     ExecStatus exec(ExecContext& context) override;
-    void parse(std::istream& in) override;
-};
-struct Call : public Instruction
-{
-    Call() : Instruction(Opcode::CALL) {}
-	ExecStatus exec(ExecContext &context) override;
-	void parse(std::istream& in) override;
 };
 struct Ret : public Instruction
 {
-    Ret() : Instruction(Opcode::RET) {}
+    Ret() : Instruction(Opcode::RET, 0) {}
 	ExecStatus exec(ExecContext &context) override;
-	void parse(std::istream& in) override;
+};
+struct Call : public Instruction
+{
+    Call() : Instruction(Opcode::CALL, 1) {}
+	ExecStatus exec(ExecContext &context) override;
 };
 struct Jmp : public Instruction
 {
-    Jmp() : Instruction(Opcode::JMP) {}
+    Jmp() : Instruction(Opcode::JMP, 2) {}
 	ExecStatus exec(ExecContext &context) override;
-	void parse(std::istream& in) override;
 };
 
