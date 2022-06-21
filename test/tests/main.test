@@ -1,6 +1,9 @@
 main() {
-    print(69);
-    print(420);
+    let sum = 420 + 69;
+    let diff = 420 - 69;
+    sum = diff;
+    print(sum);
+    print(diff);
     kill();
     return 0;
 }

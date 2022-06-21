@@ -73,6 +73,9 @@ instr_seq Instruction::fromBytecode(std::istream& in)
         case Instruction::Opcode::PUSH:
             result.push_back(std::make_shared<Push>());
             break;
+        case Instruction::Opcode::LOAD:
+            result.push_back(std::make_shared<Load>());
+            break;
         case Instruction::Opcode::ENTR:
             result.push_back(std::make_shared<Enter>());
             break;
@@ -235,7 +238,7 @@ ExecStatus Push::exec(ExecContext &context)
 
 ExecStatus Load::exec(ExecContext& context)
 {
-    context.stack.push_back(context.stack[constOperands[0]]);
+    context.stack.push_back(context.stack[stackOperands[0]]);
     return ExecStatus::SUCCESS;
 }
 

@@ -59,6 +59,18 @@ int Expression::compile(BlockContext context)
 
 int LExpression::compile(BlockContext context)
 {
+	switch (kind) {
+	case VAR_WRITE:
+		Output::code() << Push{ (operand) context->variables[id.id].stackLocation } << Pop{ };
+		break;
+	case ARRAY_WRITE:
+		// TODO
+		break;
+	default:
+		Output::error() << "Unlabeled L-expression\n";
+		return EXIT_FAILURE;
+		break;
+	}
 	return EXIT_SUCCESS;
 }
 
@@ -212,12 +224,17 @@ int Loop::compile(BlockContext context)
 
 int Definition::compile(BlockContext context)
 {
-	return EXIT_SUCCESS;
+	return expr.compile(context);
 }
 
 int Assignment::compile(BlockContext context)
 {
-	return EXIT_SUCCESS;
+	// compile RExpression
+	auto err = expr.compile(context);
+	if (err) return err;
+
+	// compile LExpression
+	return lexpr.compile(context);
 }
 
 int Function::compile(BlockContext context)
