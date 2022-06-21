@@ -68,9 +68,9 @@
 - Function parameters and locals reside on the stack
 - Instruction operands are popped from the stack in specified order
 
-When a function is called, save a function stack frame ptr (fsfp) and save parameters on the stack.
+When a function is called, save a function stack frame ptr (fsfp) and the return address (ra), and save parameters on the stack.
 - Within a function block, all references are relative to the fsfp.
-- On return, invalidate everything past the sfp.
+- On return, invalidate everything past the sfp and jump back to the ra.
 
 When a regular block is entered, save a block stack frame ptr (bsfp).
 - Within a regular block, all references are STILL relative to the fsfp.

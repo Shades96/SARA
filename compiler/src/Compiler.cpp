@@ -47,9 +47,11 @@ int Return::compile(BlockContext context)
 
 int Branch::compile(BlockContext context)
 {
-	// put condition on the stack
+	// put neagted condition on the stack
 	auto err = cond.compile(context);
 	if (err) return err;
+	Output::code() << Not{ };
+	context->instrIndex++;
 
 	// buffer block body
 	Output::Bytecode::push();
@@ -57,7 +59,7 @@ int Branch::compile(BlockContext context)
 	if (err) return err;
 	auto buf = Output::Bytecode::pop();
 
-	// put jump target on the stack
+	// put jump target for body skip on the stack
 	buf->seekg(std::ios::end);
 	size_t bodyLen = buf->tellg();
 	buf->seekg(std::ios::beg);
@@ -65,7 +67,7 @@ int Branch::compile(BlockContext context)
 	Output::code() << Push{ jmpTarget };
 	context->instrIndex++;
 
-	// output Jmp instruction
+	// output Jmp instruction for body skip
 	Output::code() << Jmp{ };
 	context->instrIndex++;
 
@@ -78,6 +80,41 @@ int Branch::compile(BlockContext context)
 
 int Loop::compile(BlockContext context)
 {
+	// remember loop entry point
+	auto loopBegin = context->instrIndex;
+
+	// put negated condition on the stack
+	auto err = cond.compile(context);
+	if (err) return err;
+	Output::code() << Not{ };
+	context->instrIndex++;
+
+	// buffer block body
+	Output::Bytecode::push();
+	err = body.compile(context);
+	if (err) return err;
+	auto buf = Output::Bytecode::pop();
+
+	// put jump target for body skip on the stack
+	buf->seekg(std::ios::end);
+	size_t bodyLen = buf->tellg();
+	buf->seekg(std::ios::beg);
+	auto jmpTarget = (operand)(context->instrIndex + bodyLen + 4);
+	Output::code() << Push{ jmpTarget };
+	context->instrIndex++;
+
+	// output Jmp instruction for body skip
+	Output::code() << Jmp{ };
+	context->instrIndex++;
+
+	// output body bytecode
+	Output::code() << buf->rdbuf();
+	context->instrIndex += bodyLen;
+
+	// unconditionally jump to the beginning of the body
+	Output::code() << Push{ 1 } << Push{ loopBegin } << Jmp{};
+	context->instrIndex += 3;
+
 	return EXIT_SUCCESS;
 }
 
