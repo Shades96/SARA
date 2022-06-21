@@ -54,6 +54,7 @@ int Expression::compile(BlockContext context)
 		return EXIT_FAILURE;
 		break;
 	}
+	context->instrIndex++;
 	return EXIT_SUCCESS;
 }
 
@@ -62,6 +63,7 @@ int LExpression::compile(BlockContext context)
 	switch (kind) {
 	case VAR_WRITE:
 		Output::code() << Push{ (operand) context->variables[id.id].stackLocation } << Pop{ };
+		context->instrIndex++;
 		break;
 	case ARRAY_WRITE:
 		// TODO
@@ -85,12 +87,15 @@ int FunctionCall::compile(BlockContext context)
 	// handle builtin functions
 	if (funName == "kill") {
 		Output::code() << Kill{ };
+		context->instrIndex++;
 	}
 	else if (funName == "print") {
 		Output::code() << Print{ };
+		context->instrIndex++;
 	}
 	else if (funName == "read") {
 		Output::code() << Read{ };
+		context->instrIndex++;
 	}
 
 	// TODO: handle user defined functions
@@ -103,9 +108,11 @@ int Term::compile(BlockContext context)
 	switch (kind) {
 	case Kind::NUMBER:
 		Output::code() << Push{ (operand) id.value };
+		context->instrIndex++;
 		break;
 	case Kind::REFERENCE:
 		Output::code() << Push{ (operand) context->variables[id.id].stackLocation } << Load{ };
+		context->instrIndex += 2;
 		break;
 	case Kind::ARRAY_READ:
 		// TODO
