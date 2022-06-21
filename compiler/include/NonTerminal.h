@@ -238,8 +238,8 @@ public:
 	int compile(BlockContext context) override;
 	Function(std::shared_ptr<function_table> functionRefs) : context(std::make_shared<BlockData>()) {}
 	BlockContext context;
-private:
 	string name;
+private:
 	ParameterList params;
 	std::unique_ptr<Block> body;
 };

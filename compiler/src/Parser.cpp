@@ -633,6 +633,7 @@ int Function::parse(const Terminal& t, BlockContext context)
 			return EXIT_FAILURE;
 		}
 		empty = false;
+		name = t.id;
 		return EXIT_SUCCESS;
 	}
 

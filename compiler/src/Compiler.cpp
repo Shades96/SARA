@@ -81,7 +81,7 @@ int Branch::compile(BlockContext context)
 int Loop::compile(BlockContext context)
 {
 	// remember loop entry point
-	auto loopBegin = context->instrIndex;
+	auto loopBegin = (operand) context->instrIndex;
 
 	// put negated condition on the stack
 	auto err = cond.compile(context);
@@ -135,6 +135,20 @@ int Function::compile(BlockContext context)
 
 int Program::compile()
 {
+	// check that main is defined
+	bool hasMain = false;
+	for (auto& f : functions) {
+		if (f.name == "main") {
+			hasMain = true;
+			break;
+		}
+	}
+	if (!hasMain) {
+		Output::error() << "main() is not defined.\n";
+		return EXIT_FAILURE;
+	}
+
+	// compile functions
 	instrIndex = functions.size();
 	for (auto& f : functions) {
 		f.context->instrIndex = instrIndex;
@@ -142,6 +156,9 @@ int Program::compile()
 		if (err) return err;
 		instrIndex = f.context->instrIndex;
 	}
+
+	// TODO: compile function table
+
 	return EXIT_SUCCESS;
 }
 

@@ -51,12 +51,15 @@ int main()
 
             Output::log() << SEP << "Parsing source...\n";
 
-            scanner.lex(sourceStream, parse);
+            auto err = scanner.lex(sourceStream, parse);
+            if (err) continue;
 
             Output::log() << SEP << "Compiling bytecode...\n";
 
             Compiler compiler;
-            compiler.compile(parser.program);
+            err = compiler.compile(parser.program);
+            if (err) continue;
+
             Output::Bytecode::flush();
             Output::Bytecode::closeOutfile();
 
