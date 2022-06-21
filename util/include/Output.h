@@ -124,14 +124,28 @@ struct Output
 				return *this;
 			}
 
+			#ifndef NDEBUG
+			if (inst().bufStack.size() == 1) {
+				Output::debug() << instr.to_string() << "\n";
+			}
+			#endif
+
 			auto bytes = instr.toBytes();
 			auto numBytes = instr.numConstOperands * sizeof(operand) + sizeof(operation);
 			bufStack.back()->write(bytes.data(), numBytes);
 			return *this;
 		}
-		Bytecode& operator<<(std::stringbuf *buf)
+		Bytecode& operator<<(std::stringstream& stream)
 		{
-			*bufStack.back() << buf;
+			auto instrs = Instruction::fromBytecode(stream);
+			for (auto& i : instrs) {
+				#ifndef NDEBUG
+				if (inst().bufStack.size() == 1) {
+					Output::debug() << i->to_string() << "\n";
+				}
+				#endif
+				Output::code() << *i;
+			}
 			return *this;
 		}
 		static void flush() {

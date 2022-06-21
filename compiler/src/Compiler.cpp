@@ -63,7 +63,7 @@ int LExpression::compile(BlockContext context)
 	switch (kind) {
 	case VAR_WRITE:
 		Output::code() << Push{ (operand) context->variables[id.id].stackLocation } << Pop{ };
-		context->instrIndex++;
+		context->instrIndex += 4;
 		break;
 	case ARRAY_WRITE:
 		// TODO
@@ -108,11 +108,11 @@ int Term::compile(BlockContext context)
 	switch (kind) {
 	case Kind::NUMBER:
 		Output::code() << Push{ (operand) id.value };
-		context->instrIndex++;
+		context->instrIndex += 3;
 		break;
 	case Kind::REFERENCE:
 		Output::code() << Push{ (operand) context->variables[id.id].stackLocation } << Load{ };
-		context->instrIndex += 2;
+		context->instrIndex += 4;
 		break;
 	case Kind::ARRAY_READ:
 		// TODO
@@ -133,8 +133,10 @@ int Term::compile(BlockContext context)
 
 int Block::compile(BlockContext context)
 {
+	this->context->instrIndex += context->instrIndex; // TODO ???
+
 	Output::code() << Enter{ };
-	context->instrIndex++;
+	this->context->instrIndex++;
 
 	for (auto& stmt : stmts) {
 		auto err = stmt->compile(this->context);
@@ -142,7 +144,7 @@ int Block::compile(BlockContext context)
 	}
 
 	Output::code() << Exit{ };
-	context->instrIndex++;
+	this->context->instrIndex++;
 	return EXIT_SUCCESS;
 }
 
@@ -171,19 +173,19 @@ int Branch::compile(BlockContext context)
 	auto buf = Output::Bytecode::pop();
 
 	// put jump target for body skip on the stack
-	buf->seekg(std::ios::end);
+	buf->seekg(0, std::ios::end);
 	size_t bodyLen = buf->tellg();
 	buf->seekg(std::ios::beg);
 	auto jmpTarget = (operand) (context->instrIndex + bodyLen + 1);
 	Output::code() << Push{ jmpTarget };
-	context->instrIndex++;
+	context->instrIndex += 3;
 
 	// output Jmp instruction for body skip
 	Output::code() << Jmp{ };
 	context->instrIndex++;
 
 	// output body bytecode
-	Output::code() << buf->rdbuf();
+	Output::code() << *buf;
 	context->instrIndex += bodyLen;
 
 	return EXIT_SUCCESS;
@@ -212,19 +214,19 @@ int Loop::compile(BlockContext context)
 	buf->seekg(std::ios::beg);
 	auto jmpTarget = (operand)(context->instrIndex + bodyLen + 4);
 	Output::code() << Push{ jmpTarget };
-	context->instrIndex++;
+	context->instrIndex += 3;
 
 	// output Jmp instruction for body skip
 	Output::code() << Jmp{ };
 	context->instrIndex++;
 
 	// output body bytecode
-	Output::code() << buf->rdbuf();
+	Output::code() << *buf;
 	context->instrIndex += bodyLen;
 
 	// unconditionally jump to the beginning of the body
 	Output::code() << Push{ 1 } << Push{ loopBegin } << Jmp{};
-	context->instrIndex += 3;
+	context->instrIndex += 7;
 
 	return EXIT_SUCCESS;
 }
@@ -246,7 +248,9 @@ int Assignment::compile(BlockContext context)
 
 int Function::compile(BlockContext context)
 {
-	return body->compile(this->context);
+	auto err = body->compile(this->context);
+	this->context->instrIndex = body->context->instrIndex;
+	return err;
 }
 
 int Program::compile()
@@ -265,7 +269,7 @@ int Program::compile()
 	}
 
 	// compile functions
-	instrIndex = functions.size();
+	//instrIndex = functions.size();	// TODO
 	for (auto& f : functions) {
 		f.context->instrIndex = instrIndex;
 		auto err = f.compile(f.context);

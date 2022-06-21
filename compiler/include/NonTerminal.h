@@ -166,8 +166,8 @@ public:
 	// make a copy of the outer scope and store it
 	Block(BlockContext outer) : Statement(Kind::BLOCK), 
 		context(std::make_shared<BlockContext::element_type>(*outer)) {};
-private:
 	BlockContext context;
+private:
 	BracketPair delim { Terminal::Kind::CURLY_OPEN, Terminal::Kind::CURLY_CLOSE };
 	vector<unique_ptr<Statement>> stmts;
 	vector<Terminal> lookaheadBuf;

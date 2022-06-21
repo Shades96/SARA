@@ -1,10 +1,11 @@
 #pragma once
 
+#include <string>
 #include <vector>
 #include <iostream>
 #include <memory>
 
-using std::vector;
+using std::vector, std::string;
 
 struct Instruction;
 using word = long;
@@ -44,42 +45,42 @@ struct Instruction
 	enum Opcode 
 	{
         // Arithmetic
-        NEG = 0,// <op1>
-        ADD,    // <op1> <op2>
-        SUB,    // <op1> <op2>
-        MUL,    // <op1> <op2>
-        DIV,    // <op1> <op2>
-        MOD,    // <op1> <op2>
+        NEG = 0,    // <op1>
+        ADD = 1,    // <op1> <op2>
+        SUB = 2,    // <op1> <op2>
+        MUL = 3,    // <op1> <op2>
+        DIV = 4,    // <op1> <op2>
+        MOD = 5,    // <op1> <op2>
 
         // Comparisons
-        GT,     // <op1> <op2>
-        LT,     // <op1> <op2>
-        EQ,     // <op1> <op2>
-        NEQ,    // <op1> <op2>
-        GEQ,    // <op1> <op2>
-        LEQ,    // <op1> <op2>
+        GT = 6,     // <op1> <op2>
+        LT = 7,     // <op1> <op2>
+        EQ = 8,     // <op1> <op2>
+        NEQ = 9,    // <op1> <op2>
+        GEQ = 10,   // <op1> <op2>
+        LEQ = 11,   // <op1> <op2>
 
         // Boolean
-        NOT,    // <op1>
-        AND,    // <op1> <op2>
-        OR,     // <op1> <op2>
+        NOT = 12,   // <op1>
+        AND = 13,   // <op1> <op2>
+        OR = 14,    // <op1> <op2>
 
         // Stack
-        POP,    // <src> <dest>
-        PUSH,   // <VAL>
-        LOAD,   // <src>
+        POP = 15,   // <src> <dest>
+        PUSH = 16,  // <VAL>
+        LOAD = 17,  // <src>
 
         // Flow control
-        ENTR,   //
-        EXIT,   //
-        KILL,   //
-        CALL,   // <op1>
-        RET,    // <op1>
-        JMP,    // <op1> <op2>
+        ENTR = 18,  //
+        EXIT = 19,  //
+        KILL = 20,  //
+        CALL = 21,  // <op1>
+        RET = 22,   // <op1>
+        JMP = 23,   // <op1> <op2>
 
         // Builtin functions
-        PRNT,   // <op1>
-        READ
+        PRNT = 24,  // <op1>
+        READ = 25   //
 	} op;
 
     size_t numStackOperands = 0;
@@ -87,7 +88,24 @@ struct Instruction
     vector<operand> constOperands;
     vector<operand> stackOperands;
     virtual ExecStatus exec(ExecContext &context);
-    void parse(std::istream& in);
+
+    static instr_seq fromBytecode(std::istream& in);
+
+    void parse(std::istream& in)
+    {
+        // parse operands
+        for (int i = 0; i < numConstOperands; i++) {
+            OperandConversion converted;
+            in.read(&converted.bytes.b1, 1);
+            in.read(&converted.bytes.b2, 1);
+            constOperands.push_back(converted.o);
+        }
+    }
+
+    string to_string() const
+    {
+        return INSTR_NAMES[op];
+    }
 
     Instruction(Opcode op) : op(op) {}
     Instruction(Opcode op, size_t numStackOperands) : op(op), 
@@ -97,7 +115,9 @@ struct Instruction
     Instruction(Opcode op, size_t numStackOperands, size_t numConstOperands, vector<operand> constOperands) : op(op),
         numStackOperands(numStackOperands), numConstOperands(numConstOperands), constOperands(constOperands) {}
     vector<char> toBytes() const;
-    static instr_seq fromBytecode(std::istream& in);
+    static const inline vector<string> INSTR_NAMES {
+            "NEG",            "ADD",            "SUB",            "MUL",            "DIV",            "MOD",            "GT",            "LT",            "EQ",            "NEQ",            "GEQ",            "LEQ",            "NOT",            "AND",            "OR",            "POP",            "PUSH",            "LOAD",            "ENTR",            "EXIT",            "KILL",            "CALL",            "RET",            "JMP",            "PRNT",            "READ",
+    };
 };
 
 struct Neg : public Instruction
@@ -231,4 +251,3 @@ struct Read : public Instruction
     Read() : Instruction(Opcode::READ, 0) {}
     ExecStatus exec(ExecContext& context) override;
 };
-
