@@ -34,6 +34,7 @@ int Term::parse(const Terminal& t, BlockContext context)
 		switch (t.kind) {
 		case Terminal::Kind::NUMBER:
 			kind = NUMBER;
+			id = t;
 			complete = true;
 			return EXIT_SUCCESS;
 			break;

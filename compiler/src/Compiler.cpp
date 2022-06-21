@@ -2,6 +2,58 @@
 
 int Expression::compile(BlockContext context)
 {
+	auto err = term1->compile(context);
+	if (err) return err;
+
+	if (term2) {
+		err = term2->compile(context);
+		if (err) return err;
+	}
+
+	switch (kind) {
+	case Kind::TERM:
+		break;
+	case Kind::NEGATION:
+		Output::code() << Not{ };
+		break;
+	case Kind::NEGATIVE:
+		Output::code() << Neg{ };
+		break;
+	case Kind::ADDITION:
+		Output::code() << Add{ };
+		break;
+	case Kind::SUBTRACTION:
+		Output::code() << Sub{ };
+		break;
+	case Kind::MULTIPLICATION:
+		Output::code() << Mul{ };
+		break;
+	case Kind::DIVISION:
+		Output::code() << Div{ };
+		break;
+	case Kind::MODULO:
+		Output::code() << Mod{ };
+		break;
+	case Kind::CONJUNCTION:
+		Output::code() << And{ };
+		break;
+	case Kind::DISJUNCTION:
+		Output::code() << Or{ };
+		break;
+	case Kind::COMPARISON_LT:
+		Output::code() << Lt{ };
+		break;
+	case Kind::COMPARISON_EQ:
+		Output::code() << Eq{ };
+		break;
+	case Kind::COMPARISON_GT:
+		Output::code() << Gt{ };
+		break;
+	default:
+		Output::error() << "Unlabeled expression\n";
+		return EXIT_FAILURE;
+		break;
+	}
 	return EXIT_SUCCESS;
 }
 
@@ -12,11 +64,51 @@ int LExpression::compile(BlockContext context)
 
 int FunctionCall::compile(BlockContext context)
 {
+	// compile parameter expressions
+	for (auto& expr : params) {
+		auto err = expr.compile(context);
+		if (err) return err;
+	}
+
+	// handle builtin functions
+	if (funName == "kill") {
+		Output::code() << Kill{ };
+	}
+	else if (funName == "print") {
+		Output::code() << Print{ };
+	}
+	else if (funName == "read") {
+		Output::code() << Read{ };
+	}
+
+	// TODO: handle user defined functions
+
 	return EXIT_SUCCESS;
 }
 
 int Term::compile(BlockContext context)
 {
+	switch (kind) {
+	case Kind::NUMBER:
+		Output::code() << Push{ (operand) id.value };
+		break;
+	case Kind::REFERENCE:
+		Output::code() << Push{ (operand) context->variables[id.id].stackLocation } << Load{ };
+		break;
+	case Kind::ARRAY_READ:
+		// TODO
+		break;
+	case Kind::FUNCTION_CALL:
+		// TODO
+		break;
+	case Kind::EXPRESSION:
+		return expr->compile(context);
+		break;
+	default:
+		Output::error() << "Unlabeled term\n";
+		return EXIT_FAILURE;
+		break;
+	}
 	return EXIT_SUCCESS;
 }
 

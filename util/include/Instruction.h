@@ -66,7 +66,7 @@ struct Instruction
 
         // Stack
         POP,    //
-        PUSH,   // <op1>
+        PUSH,   // <val>
         LOAD,   // <op1>
 
         // Flow control
@@ -76,6 +76,10 @@ struct Instruction
         CALL,   // <op1>
         RET,    // <op1>
         JMP,    // <op1> <op2>
+
+        // Builtin functions
+        PRNT,   // <op1>
+        READ
 	} op;
 
     size_t numStackOperands = 0;
@@ -215,5 +219,15 @@ struct Jmp : public Instruction
 {
     Jmp() : Instruction(Opcode::JMP, 2) {}
 	ExecStatus exec(ExecContext &context) override;
+};
+struct Print : public Instruction
+{
+    Print() : Instruction(Opcode::PRNT, 1) {}
+    ExecStatus exec(ExecContext& context) override;
+};
+struct Read : public Instruction
+{
+    Read() : Instruction(Opcode::READ, 0) {}
+    ExecStatus exec(ExecContext& context) override;
 };
 

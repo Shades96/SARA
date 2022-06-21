@@ -21,7 +21,18 @@ struct Output
 		}
 		Print& operator<<(const string& str)
 		{
-			std::cout << str;
+			std::cout 
+
+				#ifndef NDEBUG
+				<< "> "
+				#endif
+
+				<< str
+
+				#ifndef NDEBUG
+				<< "\n"
+				#endif
+				;
 			return *this;
 		}
 	};

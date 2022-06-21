@@ -114,4 +114,8 @@ When a regular block is entered, save a block stack frame ptr (bsfp).
     Call <dest>
     Jmp  <cond> <dest>
 
+    // Builtin functions
+    Prnt <op1>
+    Read
+
 -------------------

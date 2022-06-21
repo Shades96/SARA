@@ -68,7 +68,10 @@ int main()
             std::ifstream bytecodeStream{ bytecodePath };
             vector<std::shared_ptr<Instruction>> instructions = Instruction::fromBytecode(bytecodeStream);
             Runtime runtime{ instructions };
-            runtime.run();
+            err = runtime.run();
+            Output::log() << "\n";
+
+            Output::log() << SEP << "Program terminated with status " << std::to_string(err) << "\n";
 
             Output::log() << SEP << "\n";
         }

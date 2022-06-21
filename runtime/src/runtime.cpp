@@ -89,6 +89,12 @@ instr_seq Instruction::fromBytecode(std::istream& in)
         case Instruction::Opcode::JMP:
             result.push_back(std::make_shared<Jmp>());
             break;
+        case Instruction::Opcode::PRNT:
+            result.push_back(std::make_shared<Print>());
+            break;
+        case Instruction::Opcode::READ:
+            result.push_back(std::make_shared<Read>());
+            break;
         default:
             Output::error() << "Unknown istruction (" << std::to_string(opcode) << ") " 
                 << "at position " << std::to_string(result.size() + 1) << "\n";
@@ -176,7 +182,10 @@ ExecStatus Pop::exec(ExecContext &context) {
 }
 
 ExecStatus Push::exec(ExecContext &context) {
-	return ExecStatus::FAIL;
+    context.stack.push_back(operands[0]);
+
+    context.ip++;
+	return ExecStatus::SUCCESS;
 }
 
 ExecStatus Load::exec(ExecContext& context) {
@@ -184,15 +193,17 @@ ExecStatus Load::exec(ExecContext& context) {
 }
 
 ExecStatus Enter::exec(ExecContext &context) {
-	return ExecStatus::FAIL;
+    context.ip++;
+	return ExecStatus::SUCCESS;
 }
 
 ExecStatus Exit::exec(ExecContext& context) {
-    return ExecStatus::FAIL;
+    context.ip++;
+    return ExecStatus::SUCCESS;
 }
 
 ExecStatus Kill::exec(ExecContext& context) {
-    return ExecStatus::FAIL;
+    return ExecStatus::EXIT;
 }
 
 ExecStatus Call::exec(ExecContext &context) {
@@ -205,4 +216,18 @@ ExecStatus Ret::exec(ExecContext &context) {
 
 ExecStatus Jmp::exec(ExecContext &context) {
 	return ExecStatus::FAIL;
+}
+
+ExecStatus Print::exec(ExecContext& context) {
+    word top = context.stack.back();
+    context.stack.pop_back();
+
+    Output::print() << std::to_string(top);
+
+    context.ip++;
+    return ExecStatus::SUCCESS;
+}
+
+ExecStatus Read::exec(ExecContext& context) {
+    return ExecStatus::FAIL;
 }

@@ -1,3 +1,6 @@
 main() {
+    print(69);
+    print(420);
+    kill();
     return 0;
 }
