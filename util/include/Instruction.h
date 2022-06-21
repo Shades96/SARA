@@ -65,9 +65,9 @@ struct Instruction
         OR,     // <op1> <op2>
 
         // Stack
-        POP,    //
-        PUSH,   // <val>
-        LOAD,   // <op1>
+        POP,    // <src> <dest>
+        PUSH,   // <VAL>
+        LOAD,   // <src>
 
         // Flow control
         ENTR,   //
@@ -84,8 +84,9 @@ struct Instruction
 
     size_t numStackOperands = 0;
     size_t numConstOperands = 0;
-	vector<operand> operands;
-    virtual ExecStatus exec(ExecContext &context) = 0;
+    vector<operand> constOperands;
+    vector<operand> stackOperands;
+    virtual ExecStatus exec(ExecContext &context);
     void parse(std::istream& in);
 
     Instruction(Opcode op) : op(op) {}
@@ -93,8 +94,8 @@ struct Instruction
         numStackOperands(numStackOperands), numConstOperands(0) {}
     Instruction(Opcode op, size_t numStackOperands, size_t numConstOperands) : op(op), 
         numStackOperands(numStackOperands), numConstOperands(numConstOperands) {}
-    Instruction(Opcode op, size_t numStackOperands, size_t numConstOperands, vector<operand> operands) : op(op),
-        numStackOperands(numStackOperands), numConstOperands(numConstOperands), operands(operands) {}
+    Instruction(Opcode op, size_t numStackOperands, size_t numConstOperands, vector<operand> constOperands) : op(op),
+        numStackOperands(numStackOperands), numConstOperands(numConstOperands), constOperands(constOperands) {}
     vector<char> toBytes() const;
     static instr_seq fromBytecode(std::istream& in);
 };
@@ -176,7 +177,7 @@ struct Or : public Instruction
 };
 struct Pop : public Instruction
 {
-    Pop() : Instruction(Opcode::POP, 1) {}
+    Pop() : Instruction(Opcode::POP, 2) {}
 	ExecStatus exec(ExecContext &context) override;
 };
 struct Push : public Instruction

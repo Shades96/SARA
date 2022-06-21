@@ -102,7 +102,7 @@ When a regular block is entered, save a block stack frame ptr (bsfp).
     Or   <op1> <op2>
 
     // Stack
-    Pop  <dest>
+    Pop  <src> <dest>
     Push <val>  // push a constant value onto the stack
     Load <src>  // push the word at index src onto the stack
 

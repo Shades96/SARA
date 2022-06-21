@@ -4,7 +4,9 @@
 int Runtime::run()
 {
     while (status == ExecStatus::SUCCESS) {
-        status = context.instrs[context.ip]->exec(context);
+        auto fetched = context.instrs[context.ip];
+        status = fetched->Instruction::exec(context);
+        status = fetched->exec(context);
     }
     return status;
 }
@@ -106,128 +108,183 @@ instr_seq Instruction::fromBytecode(std::istream& in)
     return result;
 }
 
-void Instruction::parse(std::istream& in) {
+void Instruction::parse(std::istream& in) 
+{
     // parse operands
     for (int i = 0; i < numConstOperands; i++) {
         OperandConversion converted;
         in.read(&converted.bytes.b1, 1);
         in.read(&converted.bytes.b2, 1);
-        operands.push_back(converted.o);
+        constOperands.push_back(converted.o);
     }
 }
 
-// TODO
-ExecStatus Neg::exec(ExecContext &context) {
-	return ExecStatus::FAIL;
-}
-
-ExecStatus Add::exec(ExecContext &context) {
-	return ExecStatus::FAIL;
-}
-
-ExecStatus Sub::exec(ExecContext &context) {
-	return ExecStatus::FAIL;
-}
-
-ExecStatus Mul::exec(ExecContext &context) {
-	return ExecStatus::FAIL;
-}
-
-ExecStatus Div::exec(ExecContext &context) {
-	return ExecStatus::FAIL;
-}
-
-ExecStatus Mod::exec(ExecContext &context) {
-	return ExecStatus::FAIL;
-}
-
-ExecStatus Gt::exec(ExecContext &context) {
-	return ExecStatus::FAIL;
-}
-
-ExecStatus Lt::exec(ExecContext &context) {
-	return ExecStatus::FAIL;
-}
-
-ExecStatus Eq::exec(ExecContext &context) {
-	return ExecStatus::FAIL;
-}
-
-ExecStatus Neq::exec(ExecContext &context) {
-	return ExecStatus::FAIL;
-}
-
-ExecStatus Geq::exec(ExecContext &context) {
-	return ExecStatus::FAIL;
-}
-
-ExecStatus Leq::exec(ExecContext &context) {
-	return ExecStatus::FAIL;
-}
-
-ExecStatus Not::exec(ExecContext &context) {
-	return ExecStatus::FAIL;
-}
-
-ExecStatus And::exec(ExecContext &context) {
-	return ExecStatus::FAIL;
-}
-
-ExecStatus Or::exec(ExecContext &context) {
-	return ExecStatus::FAIL;
-}
-
-ExecStatus Pop::exec(ExecContext &context) {
-	return ExecStatus::FAIL;
-}
-
-ExecStatus Push::exec(ExecContext &context) {
-    context.stack.push_back(operands[0]);
-
-    context.ip++;
-	return ExecStatus::SUCCESS;
-}
-
-ExecStatus Load::exec(ExecContext& context) {
-    return ExecStatus::FAIL;
-}
-
-ExecStatus Enter::exec(ExecContext &context) {
-    context.ip++;
-	return ExecStatus::SUCCESS;
-}
-
-ExecStatus Exit::exec(ExecContext& context) {
+ExecStatus Instruction::exec(ExecContext& context)
+{
+    // pop stack operands
+    for (int i = 0; i < numStackOperands; i++) {
+        stackOperands.push_back((operand) context.stack.back());
+        context.stack.pop_back();
+    }
+    // advance instruction pointer
     context.ip++;
     return ExecStatus::SUCCESS;
 }
 
-ExecStatus Kill::exec(ExecContext& context) {
+ExecStatus Neg::exec(ExecContext &context)
+{
+    context.stack.push_back(-stackOperands[0]);
+	return ExecStatus::SUCCESS;
+}
+
+ExecStatus Add::exec(ExecContext &context)
+{
+    context.stack.push_back(stackOperands[1] + stackOperands[0]);
+	return ExecStatus::SUCCESS;
+}
+
+ExecStatus Sub::exec(ExecContext &context)
+{
+    context.stack.push_back(stackOperands[1] - stackOperands[0]);
+	return ExecStatus::SUCCESS;
+}
+
+ExecStatus Mul::exec(ExecContext &context)
+{
+    context.stack.push_back(stackOperands[1] * stackOperands[0]);
+	return ExecStatus::SUCCESS;
+}
+
+ExecStatus Div::exec(ExecContext &context)
+{
+    context.stack.push_back(stackOperands[1] / stackOperands[0]);
+	return ExecStatus::SUCCESS;
+}
+
+ExecStatus Mod::exec(ExecContext &context)
+{
+    context.stack.push_back(stackOperands[1] % stackOperands[0]);
+	return ExecStatus::SUCCESS;
+}
+
+ExecStatus Gt::exec(ExecContext &context)
+{
+    context.stack.push_back(stackOperands[1] > stackOperands[0]);
+	return ExecStatus::SUCCESS;
+}
+
+ExecStatus Lt::exec(ExecContext &context)
+{
+    context.stack.push_back(stackOperands[1] < stackOperands[0]);
+	return ExecStatus::SUCCESS;
+}
+
+ExecStatus Eq::exec(ExecContext &context)
+{
+    context.stack.push_back(stackOperands[1] == stackOperands[0]);
+	return ExecStatus::SUCCESS;
+}
+
+ExecStatus Neq::exec(ExecContext &context)
+{
+    context.stack.push_back(stackOperands[1] != stackOperands[0]);
+	return ExecStatus::SUCCESS;
+}
+
+ExecStatus Geq::exec(ExecContext &context)
+{
+    context.stack.push_back(stackOperands[1] >= stackOperands[0]);
+	return ExecStatus::SUCCESS;
+}
+
+ExecStatus Leq::exec(ExecContext &context)
+{
+    context.stack.push_back(stackOperands[1] <= stackOperands[0]);
+	return ExecStatus::SUCCESS;
+}
+
+ExecStatus Not::exec(ExecContext &context)
+{
+    context.stack.push_back(!stackOperands[0]);
+	return ExecStatus::SUCCESS;
+}
+
+ExecStatus And::exec(ExecContext &context)
+{
+    context.stack.push_back(stackOperands[1] && stackOperands[0]);
+	return ExecStatus::SUCCESS;
+}
+
+ExecStatus Or::exec(ExecContext &context)
+{
+    context.stack.push_back(stackOperands[1] || stackOperands[0]);
+	return ExecStatus::SUCCESS;
+}
+
+ExecStatus Pop::exec(ExecContext &context)
+{
+    context.stack[stackOperands[0]] = stackOperands[1];
+	return ExecStatus::SUCCESS;
+}
+
+ExecStatus Push::exec(ExecContext &context)
+{
+    context.stack.push_back(constOperands[0]);
+	return ExecStatus::SUCCESS;
+}
+
+ExecStatus Load::exec(ExecContext& context)
+{
+    context.stack.push_back(context.stack[constOperands[0]]);
+    return ExecStatus::SUCCESS;
+}
+
+ExecStatus Enter::exec(ExecContext &context)
+{
+    // TODO
+	return ExecStatus::SUCCESS;
+}
+
+ExecStatus Exit::exec(ExecContext& context)
+{
+    // TODO
+    return ExecStatus::SUCCESS;
+}
+
+ExecStatus Kill::exec(ExecContext& context)
+{
     return ExecStatus::EXIT;
 }
 
-ExecStatus Call::exec(ExecContext &context) {
-	return ExecStatus::FAIL;
+ExecStatus Call::exec(ExecContext &context)
+{
+    // TODO
+	return ExecStatus::SUCCESS;
 }
 
-ExecStatus Ret::exec(ExecContext &context) {
-	return ExecStatus::FAIL;
+ExecStatus Ret::exec(ExecContext &context)
+{
+    // TODO
+	return ExecStatus::SUCCESS;
 }
 
-ExecStatus Jmp::exec(ExecContext &context) {
-	return ExecStatus::FAIL;
+ExecStatus Jmp::exec(ExecContext &context)
+{
+    auto cond = stackOperands[1];
+    if (cond) {
+        context.ip = stackOperands[0];
+    }
+	return ExecStatus::SUCCESS;
 }
 
-ExecStatus Print::exec(ExecContext& context) {
-    word top = context.stack.back();
-    context.stack.pop_back();
-
-    Output::print() << std::to_string(top);
-
-    context.ip++;
+ExecStatus Print::exec(ExecContext& context)
+{
+    Output::print() << std::to_string(stackOperands[0]);
     return ExecStatus::SUCCESS;
 }
 
-ExecStatus Read::exec(ExecContext& context) {
-    return ExecStatus::FAIL;
+ExecStatus Read::exec(ExecContext& context)
+{
+    // TODO
+    return ExecStatus::SUCCESS;
 }

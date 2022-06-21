@@ -274,7 +274,7 @@ vector<char> Instruction::toBytes() const
 	vector<char> result;
 	auto operationByte = (operation) op;
 	result.push_back((char) operationByte);
-	for (auto o : operands) {
+	for (auto o : constOperands) {
 		OperandConversion converted;
 		converted.o = o;
 		result.push_back((char) converted.bytes.b1);
