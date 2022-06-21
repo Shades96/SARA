@@ -1,4 +1,4 @@
-#include "Instruction.h"
+#include "Runtime.h"
 #include "Output.h"
 
 const string PROG_NAME = "<program-name>";
@@ -10,9 +10,10 @@ void usage()
 
 int main(int argc, char* argv[])
 {
+    instr_seq instructions;
     switch (argc) {
     case 1: {
-        vector<Instruction> instructions = Instruction::fromBytecode(std::cin);
+        instructions = Instruction::fromBytecode(std::cin);
         break;
     }
     case 2: {
@@ -21,7 +22,7 @@ int main(int argc, char* argv[])
             Output::error() << "Bad input\n";
             return EXIT_FAILURE;
         }
-        vector<Instruction> instructions = Instruction::fromBytecode(input);
+        instructions = Instruction::fromBytecode(input);
         break;
     }
     default: {
@@ -30,4 +31,7 @@ int main(int argc, char* argv[])
         break;
     }
     }
+
+    Runtime runtime{ instructions };
+    return runtime.run();
 }

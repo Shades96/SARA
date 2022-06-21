@@ -6,8 +6,8 @@
 #include "Scanner.h"
 #include "Parser.h"
 #include "Compiler.h"
+#include "Runtime.h"
 #include "Output.h"
-#include "Instruction.h"
 
 using std::string;
 
@@ -47,7 +47,6 @@ int main()
 
             Scanner scanner;
             Parser parser;
-            Compiler compiler;
             auto parse = [&parser](Terminal t) { return parser.parse(t); };
 
             Output::log() << SEP << "Parsing source...\n";
@@ -56,6 +55,7 @@ int main()
 
             Output::log() << SEP << "Compiling bytecode...\n";
 
+            Compiler compiler;
             compiler.compile(parser.program);
             Output::Bytecode::flush();
             Output::Bytecode::closeOutfile();
@@ -64,6 +64,8 @@ int main()
 
             std::ifstream bytecodeStream{ bytecodePath };
             vector<std::shared_ptr<Instruction>> instructions = Instruction::fromBytecode(bytecodeStream);
+            Runtime runtime{ instructions };
+            runtime.run();
 
             Output::log() << SEP << "\n";
         }

@@ -23,11 +23,15 @@ int Term::compile(BlockContext context)
 int Block::compile(BlockContext context)
 {
 	Output::code() << Enter{ };
+	context->instrIndex++;
+
 	for (auto& stmt : stmts) {
 		auto err = stmt->compile(this->context);
 		if (err) return err;
 	}
+
 	Output::code() << Exit{ };
+	context->instrIndex++;
 	return EXIT_SUCCESS;
 }
 
@@ -35,15 +39,40 @@ int Return::compile(BlockContext context)
 {
 	auto err = expr.compile(context);
 	if (err) return err;
+
 	Output::code() << Ret{ };
+	context->instrIndex++;
 	return EXIT_SUCCESS;
 }
 
 int Branch::compile(BlockContext context)
 {
+	// put condition on the stack
 	auto err = cond.compile(context);
 	if (err) return err;
-	Output::code() << Ret{ };
+
+	// buffer block body
+	Output::Bytecode::push();
+	err = body.compile(context);
+	if (err) return err;
+	auto buf = Output::Bytecode::pop();
+
+	// put jump target on the stack
+	buf->seekg(std::ios::end);
+	size_t bodyLen = buf->tellg();
+	buf->seekg(std::ios::beg);
+	auto jmpTarget = (operand) (context->instrIndex + bodyLen + 1);
+	Output::code() << Push{ jmpTarget };
+	context->instrIndex++;
+
+	// output Jmp instruction
+	Output::code() << Jmp{ };
+	context->instrIndex++;
+
+	// output body bytecode
+	Output::code() << buf->rdbuf();
+	context->instrIndex += bodyLen;
+
 	return EXIT_SUCCESS;
 }
 
@@ -69,9 +98,12 @@ int Function::compile(BlockContext context)
 
 int Program::compile()
 {
+	instrIndex = functions.size();
 	for (auto& f : functions) {
+		f.context->instrIndex = instrIndex;
 		auto err = f.compile(f.context);
 		if (err) return err;
+		instrIndex = f.context->instrIndex;
 	}
 	return EXIT_SUCCESS;
 }

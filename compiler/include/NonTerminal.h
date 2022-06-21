@@ -29,6 +29,7 @@ struct BlockData
 {
 	symbol_table<Variable> variables;
 	function_table functionRefs;
+	size_t instrIndex = 0;
 };
 using BlockContext = std::shared_ptr<BlockData>;
 
@@ -251,4 +252,5 @@ public:
 	Program() : functionRefs(std::make_shared<function_table>()) {}
 	vector<Function> functions;
 	std::shared_ptr<function_table> functionRefs;
+	size_t instrIndex = 0;
 };

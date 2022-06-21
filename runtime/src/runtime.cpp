@@ -102,7 +102,7 @@ instr_seq Instruction::fromBytecode(std::istream& in)
 
 void Instruction::parse(std::istream& in) {
     // parse operands
-    for (int i = 0; i < arity; i++) {
+    for (int i = 0; i < numConstOperands; i++) {
         OperandConversion converted;
         in.read(&converted.bytes.b1, 1);
         in.read(&converted.bytes.b2, 1);
@@ -177,6 +177,10 @@ ExecStatus Pop::exec(ExecContext &context) {
 
 ExecStatus Push::exec(ExecContext &context) {
 	return ExecStatus::FAIL;
+}
+
+ExecStatus Load::exec(ExecContext& context) {
+    return ExecStatus::FAIL;
 }
 
 ExecStatus Enter::exec(ExecContext &context) {

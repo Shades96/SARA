@@ -114,8 +114,13 @@ struct Output
 			}
 
 			auto bytes = instr.toBytes();
-			auto numBytes = instr.arity * sizeof(operand) + sizeof(operation);
+			auto numBytes = instr.numConstOperands * sizeof(operand) + sizeof(operation);
 			bufStack.back()->write(bytes.data(), numBytes);
+			return *this;
+		}
+		Bytecode& operator<<(std::stringbuf *buf)
+		{
+			*bufStack.back() << buf;
 			return *this;
 		}
 		static void flush() {

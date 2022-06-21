@@ -24,11 +24,13 @@ union OperandConversion {
 
 struct ExecContext
 {
+    instr_seq	        instrs;     // instruction sequence
+    instr_ptr	        ip;         // instruction pointer
     stack               stack;      // program stack
     stack_ptr           fsfp;       // function stack frame pointer
     vector<stack_ptr>   bsfp;       // stack of block stack frame pointers
-    instr_seq	        instrs;     // instruction sequence
-    instr_ptr	        ip;         // instruction pointer
+
+    ExecContext(instr_seq instrs) : instrs{ instrs }, ip{ 0 }, stack{ }, fsfp{ 0 }, bsfp{ 0 } {}
 };
 
 enum ExecStatus {
@@ -65,6 +67,7 @@ struct Instruction
         // Stack
         POP,    //
         PUSH,   // <op1>
+        LOAD,   // <op1>
 
         // Flow control
         ENTR,   //
@@ -75,13 +78,19 @@ struct Instruction
         JMP,    // <op1> <op2>
 	} op;
 
-    size_t arity = 0;
+    size_t numStackOperands = 0;
+    size_t numConstOperands = 0;
 	vector<operand> operands;
     virtual ExecStatus exec(ExecContext &context) = 0;
     void parse(std::istream& in);
 
     Instruction(Opcode op) : op(op) {}
-    Instruction(Opcode op, size_t arity) : op(op), arity(arity) {}
+    Instruction(Opcode op, size_t numStackOperands) : op(op), 
+        numStackOperands(numStackOperands), numConstOperands(0) {}
+    Instruction(Opcode op, size_t numStackOperands, size_t numConstOperands) : op(op), 
+        numStackOperands(numStackOperands), numConstOperands(numConstOperands) {}
+    Instruction(Opcode op, size_t numStackOperands, size_t numConstOperands, vector<operand> operands) : op(op),
+        numStackOperands(numStackOperands), numConstOperands(numConstOperands), operands(operands) {}
     vector<char> toBytes() const;
     static instr_seq fromBytecode(std::istream& in);
 };
@@ -168,8 +177,14 @@ struct Pop : public Instruction
 };
 struct Push : public Instruction
 {
-    Push() : Instruction(Opcode::PUSH, 1) {}
+    Push() : Instruction(Opcode::PUSH, 0, 1) {}
+    Push(operand value) : Instruction(Opcode::PUSH, 0, 1, vector<operand>{ value }) {}
 	ExecStatus exec(ExecContext &context) override;
+};
+struct Load : public Instruction
+{
+    Load() : Instruction(Opcode::LOAD, 1) {}
+    ExecStatus exec(ExecContext& context) override;
 };
 struct Enter : public Instruction
 {

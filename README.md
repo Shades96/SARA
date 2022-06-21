@@ -66,7 +66,7 @@
 ----------
 
 - Function parameters and locals reside on the stack
-- Instruction operands index the stack
+- Instruction operands are popped from the stack in specified order
 
 When a function is called, save a function stack frame ptr (fsfp) and save parameters on the stack.
 - Within a function block, all references are relative to the fsfp.
@@ -103,7 +103,8 @@ When a regular block is entered, save a block stack frame ptr (bsfp).
 
     // Stack
     Pop  <dest>
-    Push <src>
+    Push <val>  // push a constant value onto the stack
+    Load <src>  // push the word at index src onto the stack
 
     // Control
     Entr
@@ -111,6 +112,6 @@ When a regular block is entered, save a block stack frame ptr (bsfp).
     Kill
     Ret
     Call <dest>
-    Jmp  <dest> <cond>
+    Jmp  <cond> <dest>
 
 -------------------
