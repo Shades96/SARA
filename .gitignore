@@ -5,6 +5,7 @@
 
 # Compiler output
 *.sara
+*.out
 
 # Binary/build files
 */bin/

@@ -130,21 +130,13 @@ struct Output
 			}
 			#endif
 
-			auto bytes = instr.toBytes();
-			auto numBytes = instr.numConstOperands * sizeof(operand) + sizeof(operation);
-			bufStack.back()->write(bytes.data(), numBytes);
+			bufStack.back().push_back(instr);
 			return *this;
 		}
-		Bytecode& operator<<(std::stringstream& stream)
+		Bytecode& operator<<(vector<Instruction> instrs)
 		{
-			auto instrs = Instruction::fromBytecode(stream);
 			for (auto& i : instrs) {
-				#ifndef NDEBUG
-				if (inst().bufStack.size() == 1) {
-					Output::debug() << i->to_string() << "\n";
-				}
-				#endif
-				Output::code() << *i;
+				Output::code() << i;
 			}
 			return *this;
 		}
@@ -153,18 +145,23 @@ struct Output
 				Output::error() << "Buffer stack has not been initialized or flattened\n";
 				return;
 			}
-			*inst().out << inst().bufStack[0]->rdbuf();
+
+			for (auto& instr : inst().bufStack[0]) {
+				auto bytes = instr.toBytes();
+				auto numBytes = instr.numConstOperands * sizeof(operand) + sizeof(operation);
+				inst().out->write(bytes.data(), numBytes);
+			}
 		}
 		static void push() {
-			inst().bufStack.push_back(std::make_shared<std::stringstream>());
+			inst().bufStack.push_back(vector<Instruction>{ });
 		}
-		static std::shared_ptr<std::stringstream> pop() {
+		static vector<Instruction> pop() {
 			auto top = inst().bufStack.back();
 			inst().bufStack.pop_back();
 			return top;
 		}
 	private:
-		vector<std::shared_ptr<std::stringstream>> bufStack { std::make_shared<std::stringstream>() };
+		vector<vector<Instruction>> bufStack{ vector<vector<Instruction>> (1) };
 		std::shared_ptr<std::ofstream> out;
 	};
 	static Bytecode& code()
