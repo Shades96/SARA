@@ -1,5 +1,7 @@
 main() {
+    print(0);
     return fac(10);
+    print(0);
 }
 
 fac(n) {
@@ -10,5 +12,6 @@ fac(n) {
         i = i + 1;
         result = result * i;
     }
+    print(result);
     return result;
 }

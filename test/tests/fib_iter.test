@@ -1,5 +1,7 @@
 main() {
+    print(0);
     return fib(10);
+    print(0);
 }
 
 fib(n) {
@@ -13,5 +15,6 @@ fib(n) {
         last = tmp;
         i = i + 1;
     }
+    print(curr);
     return curr;
 }

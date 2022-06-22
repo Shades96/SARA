@@ -8,9 +8,9 @@
 using std::vector, std::string;
 
 struct Instruction;
-using word = long long;
-using operation = unsigned char;
-using operand = unsigned short;
+using word = long long;             // 64 bit
+using operation = unsigned char;    //  8 bit
+using operand = unsigned short;     // 16 bit
 using stack = vector<word>;
 using instr_seq = vector<std::shared_ptr<Instruction>>;
 using instr_ptr = instr_seq::size_type;

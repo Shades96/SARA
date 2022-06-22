@@ -518,7 +518,18 @@ int Block::parse(const Terminal& t, BlockContext context)
 		if (delim.isComplete()) {
 			Output::debug() << "Block statement complete\n";
 			complete = true;
-			if (stmts.empty() || stmts.back()->isComplete()) {
+			if (stmts.empty()) {
+				return EXIT_SUCCESS;
+			}
+			if (stmts.back()->isComplete()) {
+				for (auto& funRef : this->context->functionRefs) {
+					// this->context needs to pass functionRefs upwards
+					auto funName = funRef.first;
+					if (context->functionRefs.find(funName) == context->functionRefs.end()) {
+						// TODO: check that assigned size is correct
+						context->functionRefs[funName] = context->functionRefs.size();
+					}
+				}
 				return EXIT_SUCCESS;
 			}
 			Output::error() << "Unexpected '" << Terminal::KIND_NAMES[t.kind] << "' - expected statement\n";
@@ -656,7 +667,15 @@ int Function::parse(const Terminal& t, BlockContext context)
 
 int Program::parse(const Terminal& t)
 {
-	if (functions.empty() || functions.back().isComplete()) {
+	if (functions.empty()) {
+		functions.push_back(Function{ functionRefs });
+	} else if (functions.back().isComplete()) {
+		for (auto& funRef : functions.back().context->functionRefs) {
+			auto funName = funRef.first;
+			if (functionRefs->find(funName) == functionRefs->end()) {
+				(*functionRefs)[funName] = functionRefs->size();
+			}
+		}
 		functions.push_back(Function{ functionRefs });
 	}
 	auto err = functions.back().parse(t, functions.back().context);

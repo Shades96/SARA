@@ -236,9 +236,13 @@ class Function : public NonTerminal
 public:
 	int parse(const Terminal& t, BlockContext context) override;
 	int compile(BlockContext context) override;
-	Function(std::shared_ptr<function_table> functionRefs) : context(std::make_shared<BlockData>()) {}
+	Function(std::shared_ptr<function_table> functionRefs) : context(std::make_shared<BlockData>()) 
+	{
+		context->functionRefs = *functionRefs;
+	}
 	BlockContext context;
 	string name;
+	size_t entryPoint;
 private:
 	ParameterList params;
 	std::unique_ptr<Block> body;
@@ -249,7 +253,10 @@ class Program
 public:
 	int parse(const Terminal& t);
 	int compile();
-	Program() : functionRefs(std::make_shared<function_table>()) {}
+	Program() : functionRefs(std::make_shared<function_table>()) 
+	{
+		(*functionRefs)["main"] = 0;
+	}
 	vector<Function> functions;
 	std::shared_ptr<function_table> functionRefs;
 	size_t instrIndex = 0;

@@ -101,6 +101,7 @@ int FunctionCall::compile(BlockContext context)
 
 	// TODO: handle user defined functions
 
+
 	return EXIT_SUCCESS;
 }
 
@@ -119,7 +120,7 @@ int Term::compile(BlockContext context)
 		// TODO
 		break;
 	case Kind::FUNCTION_CALL:
-		// TODO
+		return funCall->compile(context);
 		break;
 	case Kind::EXPRESSION:
 		return expr->compile(context);
@@ -256,17 +257,41 @@ int Program::compile()
 		return EXIT_FAILURE;
 	}
 
-	// compile functions
-	//instrIndex = functions.size();	// TODO
+	// make room for function table
+	instrIndex = functions.size() * 3;
+	Output::Bytecode::push();
+
+	// buffer compiled functions, save entry points
 	for (auto& f : functions) {
+		f.entryPoint = instrIndex;
 		f.context->instrIndex = instrIndex;
+		f.context->functionRefs = *functionRefs;
 		auto err = f.compile(f.context);
 		if (err) return err;
 		instrIndex = f.context->instrIndex;
+		for (auto& funRef : f.context->functionRefs) {
+			auto funName = funRef.first;
+			if (functionRefs->find(funName) == functionRefs->end()) {
+				(*functionRefs)[funName] = functionRefs->size();
+			}
+		}
+	}
+	auto codeBuf = Output::Bytecode::pop();
+
+	// compile function table
+	for (auto& f : functions) {
+		if (f.name == "main") {
+			Output::code() << Push{ 1 } << Push{ (operand) f.entryPoint } << Jmp{ };
+		}
+	}
+	for (auto& f : functions) {
+		if (f.name != "main") {
+			Output::code() << Push{ 1 } << Push{ (operand) f.entryPoint } << Jmp{ };
+		}
 	}
 
-	// TODO: compile function table
-
+	// output compiled functions
+	Output::code() << codeBuf;
 	return EXIT_SUCCESS;
 }
 
