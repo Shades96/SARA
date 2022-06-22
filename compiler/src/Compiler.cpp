@@ -177,8 +177,7 @@ int Branch::compile(BlockContext context)
 	auto buf = Output::Bytecode::pop();
 
 	// put jump target for body skip on the stack
-	size_t bodyLen = buf.size();
-	auto jmpTarget = (operand) (context->instrIndex + bodyLen + 1);
+	auto jmpTarget = (operand) context->instrIndex;
 	Output::code() << Push{ jmpTarget };
 
 	// output Jmp instruction for body skip
@@ -186,7 +185,6 @@ int Branch::compile(BlockContext context)
 
 	// output body bytecode
 	Output::code() << buf;
-	context->instrIndex += bodyLen;
 
 	return EXIT_SUCCESS;
 }
@@ -209,8 +207,7 @@ int Loop::compile(BlockContext context)
 	auto buf = Output::Bytecode::pop();
 
 	// put jump target for body skip on the stack
-	size_t bodyLen = buf.size();
-	auto jmpTarget = (operand)(context->instrIndex + bodyLen + 4);
+	auto jmpTarget = (operand)(context->instrIndex + 3);
 	Output::code() << Push{ jmpTarget };
 	context->instrIndex++;
 
@@ -220,7 +217,6 @@ int Loop::compile(BlockContext context)
 
 	// output body bytecode
 	Output::code() << buf;
-	context->instrIndex += bodyLen;
 
 	// unconditionally jump to the beginning of the body
 	Output::code() << Push{ 1 } << Push{ loopBegin } << Jmp{};
