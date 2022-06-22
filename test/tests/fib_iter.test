@@ -1,6 +1,6 @@
 main() {
     print(0);
-    return fib(10);
+    return fib(50);
     print(0);
     kill();
 }
@@ -10,12 +10,13 @@ fib(n) {
     let i = 2;
     let curr = 1;
     let last = 1;
+    let tmp = 0;
     while i < n {
-        let tmp = curr;
+        tmp = curr;
         curr = curr + last;
         last = tmp;
         i = i + 1;
+        print(curr);
     }
-    print(curr);
     return curr;
 }

@@ -306,7 +306,7 @@ int FunctionCall::parse(const Terminal& t, BlockContext context)
 		break;
 	case Terminal::Kind::COMMA:
 		if (nestingDepth == 0) {
-			if (!params.empty() && params.back().isComplete()) {
+			if (params.empty()) {
 				Output::error() << "Unexpected '" << Terminal::KIND_NAMES[t.kind] << "' - expected expression\n";
 				return EXIT_FAILURE;
 			}
