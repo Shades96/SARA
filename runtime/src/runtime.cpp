@@ -152,7 +152,6 @@ ExecStatus Kill::exec(ExecContext& context)
 
 ExecStatus Call::exec(ExecContext &context)
 {
-    //context.fsfp.push_back(context.stack.size() - 1);   // save fsfp
     context.fsfp.push_back(context.stack.size());   // save fsfp
 	return ExecStatus::SUCCESS;
 }
@@ -289,8 +288,6 @@ instr_seq Instruction::fromBytecode(std::istream& in)
             result.push_back(std::make_shared<Read>());
             break;
         default:
-            //Output::error() << "Unknown istruction (" << std::to_string(opcode) << ") "
-            //    << "at position " << std::to_string(result.size() + 1) << "\n";
             std::cout << "Unknown istruction (" << std::to_string(opcode) << ") "
                 << "at position " << std::to_string(result.size() + 1) << "\n";
             return result;

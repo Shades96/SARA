@@ -105,11 +105,9 @@ int FunctionCall::compile(BlockContext context)
 	// handle user defined functions
 	// save fsfp and return address
 	context->instrIndex += 5 + (params.size() * 2);
-	//context->instrIndex += 5;
 	Output::code() << Push{ (operand) context->instrIndex } << Call{ };
 
 	// copy parameters to next stack frame
-	//for (int i = -((int) params.size()); i < 0; i++) {
 	for (int i = -((int)params.size() + 1); i < -1; i++) {
 		Output::code() << Push{ (operand) i } << Load{ };
 	}
