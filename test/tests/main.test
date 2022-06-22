@@ -1,19 +1,8 @@
 main() {
-    if 1 {
-        if 0 {
-            print(0);
-        }
-        if 1 {
-            if 1 {
-                print(1);
-            }
-            if 0 {
-                print(0);
-            }
-            if 1 {
-                print(1);
-            }
-        }
+    let i = 0;
+    while i < 10 {
+        print(i);
+        i = i + 1;
     }
     kill();
     return 0;

@@ -176,12 +176,9 @@ int Branch::compile(BlockContext context)
 	if (err) return err;
 	auto buf = Output::Bytecode::pop();
 
-	// put jump target for body skip on the stack
+	// compile conditional body skip
 	auto jmpTarget = (operand) context->instrIndex;
-	Output::code() << Push{ jmpTarget };
-
-	// output Jmp instruction for body skip
-	Output::code() << Jmp{ };
+	Output::code() << Push{ jmpTarget } << Jmp{ };
 
 	// output body bytecode
 	Output::code() << buf;
@@ -198,7 +195,9 @@ int Loop::compile(BlockContext context)
 	auto err = cond.compile(context);
 	if (err) return err;
 	Output::code() << Not{ };
-	context->instrIndex++;
+
+	// preliminary incr for following Push/Jmp because body needs to know
+	context->instrIndex += 3;
 
 	// buffer block body
 	Output::Bytecode::push();
@@ -206,14 +205,9 @@ int Loop::compile(BlockContext context)
 	if (err) return err;
 	auto buf = Output::Bytecode::pop();
 
-	// put jump target for body skip on the stack
+	// compile conditional body skip
 	auto jmpTarget = (operand)(context->instrIndex + 3);
-	Output::code() << Push{ jmpTarget };
-	context->instrIndex++;
-
-	// output Jmp instruction for body skip
-	Output::code() << Jmp{ };
-	context->instrIndex++;
+	Output::code() << Push{ jmpTarget } << Jmp{ };
 
 	// output body bytecode
 	Output::code() << buf;
