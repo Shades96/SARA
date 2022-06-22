@@ -1,5 +1,5 @@
 main() {
-    let n = 10;
+    let n = 100;
     if n < 3 { return 1; }
     let i = 2;
     let curr = 1;

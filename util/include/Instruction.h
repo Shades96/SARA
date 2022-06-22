@@ -8,7 +8,7 @@
 using std::vector, std::string;
 
 struct Instruction;
-using word = long;
+using word = long long;
 using operation = unsigned char;
 using operand = unsigned short;
 using stack = vector<word>;
@@ -86,7 +86,7 @@ struct Instruction
     size_t numStackOperands = 0;
     size_t numConstOperands = 0;
     vector<operand> constOperands;
-    vector<operand> stackOperands;
+    vector<word> stackOperands;
     virtual ExecStatus exec(ExecContext &context);
 
     static instr_seq fromBytecode(std::istream& in);

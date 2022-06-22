@@ -17,7 +17,7 @@ ExecStatus Instruction::exec(ExecContext& context)
     // pop stack operands
     stackOperands.clear();
     for (int i = 0; i < numStackOperands; i++) {
-        stackOperands.push_back((operand) context.stack.back());
+        stackOperands.push_back(context.stack.back());
         context.stack.pop_back();
     }
     // advance instruction pointer
