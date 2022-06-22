@@ -243,6 +243,9 @@ public:
 	BlockContext context;
 	string name;
 	size_t entryPoint;
+	static const inline vector<string> builtinFunctionNames {
+		"print", "read", "kill"
+	};
 private:
 	ParameterList params;
 	std::unique_ptr<Block> body;

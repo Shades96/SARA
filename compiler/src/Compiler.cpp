@@ -89,18 +89,34 @@ int FunctionCall::compile(BlockContext context)
 	if (funName == "kill") {
 		Output::code() << Kill{ };
 		context->instrIndex++;
+		return EXIT_SUCCESS;
 	}
 	else if (funName == "print") {
 		Output::code() << Print{ };
 		context->instrIndex++;
+		return EXIT_SUCCESS;
 	}
 	else if (funName == "read") {
 		Output::code() << Read{ };
 		context->instrIndex++;
+		return EXIT_SUCCESS;
 	}
 
-	// TODO: handle user defined functions
+	// handle user defined functions
+	// save fsfp and return address
+	context->instrIndex += 5;
+	Output::code() << Push{ (operand) context->instrIndex } << Call{ };
 
+	// find respective function table entry
+	auto funTableEntry = context->functionRefs.find(funName);
+	if (funTableEntry == context->functionRefs.end()) {
+		Output::error() << "No function table entry for '" << funName << "'\n";
+		return EXIT_FAILURE;
+	}
+
+	// jump to the function
+	auto jmpTarget = funTableEntry->second * 3;
+	Output::code() << Push{ 1 } << Push{ (operand) jmpTarget } << Jmp{};
 
 	return EXIT_SUCCESS;
 }
@@ -158,6 +174,7 @@ int Return::compile(BlockContext context)
 
 	Output::code() << Ret{ };
 	context->instrIndex++;
+
 	return EXIT_SUCCESS;
 }
 

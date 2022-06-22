@@ -28,7 +28,7 @@ struct ExecContext
     instr_seq	        instrs;     // instruction sequence
     instr_ptr	        ip;         // instruction pointer
     stack               stack;      // program stack
-    stack_ptr           fsfp;       // function stack frame pointer
+    vector<stack_ptr>   fsfp;       // function stack frame pointer
     vector<stack_ptr>   bsfp;       // stack of block stack frame pointers
 
     ExecContext(instr_seq instrs) : instrs{ instrs }, ip{ 0 }, stack{ }, fsfp{ 0 }, bsfp{ 0 } {}

@@ -129,7 +129,7 @@ ExecStatus Push::exec(ExecContext &context)
 
 ExecStatus Load::exec(ExecContext& context)
 {
-    context.stack.push_back(context.stack[stackOperands[0]]);
+    context.stack.push_back(context.stack[stackOperands[0] + context.fsfp.back()]);
     return ExecStatus::SUCCESS;
 }
 
@@ -152,13 +152,19 @@ ExecStatus Kill::exec(ExecContext& context)
 
 ExecStatus Call::exec(ExecContext &context)
 {
-    // TODO
+    context.fsfp.push_back(context.stack.size() - 1);   // save fsfp
 	return ExecStatus::SUCCESS;
 }
 
 ExecStatus Ret::exec(ExecContext &context)
 {
-    // TODO
+    // cleanup everything past last fsfp, then pop it
+    while (context.stack.size() > context.fsfp.back() + 1) {
+        context.stack.pop_back();
+    }
+    context.fsfp.pop_back();
+
+    // jump back to saved return address
 	return ExecStatus::SUCCESS;
 }
 

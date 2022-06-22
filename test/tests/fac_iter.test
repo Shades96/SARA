@@ -2,6 +2,7 @@ main() {
     print(0);
     return fac(10);
     print(0);
+    kill();
 }
 
 fac(n) {

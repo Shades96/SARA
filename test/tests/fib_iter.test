@@ -2,6 +2,7 @@ main() {
     print(0);
     return fib(10);
     print(0);
+    kill();
 }
 
 fib(n) {

@@ -3,6 +3,7 @@
 #include "Output.h"
 
 #include <iostream>
+#include <algorithm>
 
 int BracketPair::parse(const Terminal& t, BlockContext context) 
 {
@@ -289,9 +290,10 @@ int FunctionCall::parse(const Terminal& t, BlockContext context)
 				auto err = params.back().parse(t, context);
 			}
 			if (params.empty() || params.back().isComplete()) {
-				if (context->functionRefs.find(funName) == context->functionRefs.end()) {
-					// TODO: check that assigned size is correct
-					context->functionRefs[funName] = context->functionRefs.size();
+				if (std::find(Function::builtinFunctionNames.begin(), Function::builtinFunctionNames.end(), funName) == Function::builtinFunctionNames.end()) {
+					if (context->functionRefs.find(funName) == context->functionRefs.end()) {
+						context->functionRefs[funName] = context->functionRefs.size();
+					}
 				}
 				Output::debug() << "Call statement complete\n";
 				complete = true;
@@ -523,10 +525,8 @@ int Block::parse(const Terminal& t, BlockContext context)
 			}
 			if (stmts.back()->isComplete()) {
 				for (auto& funRef : this->context->functionRefs) {
-					// this->context needs to pass functionRefs upwards
 					auto funName = funRef.first;
 					if (context->functionRefs.find(funName) == context->functionRefs.end()) {
-						// TODO: check that assigned size is correct
 						context->functionRefs[funName] = context->functionRefs.size();
 					}
 				}
