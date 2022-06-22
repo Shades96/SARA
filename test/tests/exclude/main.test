@@ -5,5 +5,4 @@ main() {
         i = i + 1;
     }
     kill();
-    return 0;
 }

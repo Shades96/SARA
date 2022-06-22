@@ -1,0 +1,17 @@
+main() {
+    let n = 10;
+    if n < 3 { return 1; }
+    let i = 2;
+    let curr = 1;
+    let last = 1;
+    let tmp = curr;
+    while i < n {
+        tmp = curr;
+        curr = curr + last;
+        last = tmp;
+        i = i + 1;
+        print(curr);
+    }
+    kill();
+    return curr;
+}

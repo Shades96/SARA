@@ -151,6 +151,9 @@ struct Output
 				auto numBytes = instr.numConstOperands * sizeof(operand) + sizeof(operation);
 				inst().out->write(bytes.data(), numBytes);
 			}
+			
+			inst().bufStack.clear();
+			inst().bufStack = vector<vector<Instruction>>(1);
 		}
 		static void push() {
 			inst().bufStack.push_back(vector<Instruction>{ });
@@ -161,7 +164,7 @@ struct Output
 			return top;
 		}
 	private:
-		vector<vector<Instruction>> bufStack{ vector<vector<Instruction>> (1) };
+		vector<vector<Instruction>> bufStack{ vector<vector<Instruction>>(1) };
 		std::shared_ptr<std::ofstream> out;
 	};
 	static Bytecode& code()
