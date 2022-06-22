@@ -3,7 +3,7 @@
 
 int Runtime::run()
 {
-    while (status == ExecStatus::SUCCESS) {
+    while (status == ExecStatus::SUCCESS && context.fsfp.size()) {
         auto fetched = context.instrs[context.ip];
         status = fetched->Instruction::exec(context);
         status = fetched->exec(context);
@@ -117,7 +117,7 @@ ExecStatus Or::exec(ExecContext &context)
 
 ExecStatus Pop::exec(ExecContext &context)
 {
-    context.stack[stackOperands[0]] = stackOperands[1];
+    context.stack[stackOperands[0] + context.fsfp.back()] = stackOperands[1];
 	return ExecStatus::SUCCESS;
 }
 
@@ -152,14 +152,15 @@ ExecStatus Kill::exec(ExecContext& context)
 
 ExecStatus Call::exec(ExecContext &context)
 {
-    context.fsfp.push_back(context.stack.size() - 1);   // save fsfp
+    //context.fsfp.push_back(context.stack.size() - 1);   // save fsfp
+    context.fsfp.push_back(context.stack.size());   // save fsfp
 	return ExecStatus::SUCCESS;
 }
 
 ExecStatus Ret::exec(ExecContext &context)
 {
     // cleanup everything past last fsfp, then pop it
-    while (context.stack.size() > context.fsfp.back() + 1) {
+    while (context.stack.size() > context.fsfp.back()) {
         context.stack.pop_back();
     }
     context.fsfp.pop_back();
@@ -168,7 +169,13 @@ ExecStatus Ret::exec(ExecContext &context)
 	return ExecStatus::SUCCESS;
 }
 
-ExecStatus Jmp::exec(ExecContext &context)
+ExecStatus Jmp::exec(ExecContext& context)
+{
+    context.ip = stackOperands[0];
+    return ExecStatus::SUCCESS;
+}
+
+ExecStatus Jmpc::exec(ExecContext &context)
 {
     auto cond = stackOperands[1];
     if (cond) {
@@ -271,6 +278,9 @@ instr_seq Instruction::fromBytecode(std::istream& in)
             break;
         case Instruction::Opcode::JMP:
             result.push_back(std::make_shared<Jmp>());
+            break;
+        case Instruction::Opcode::JMPC:
+            result.push_back(std::make_shared<Jmpc>());
             break;
         case Instruction::Opcode::PRNT:
             result.push_back(std::make_shared<Print>());

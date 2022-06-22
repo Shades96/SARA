@@ -104,8 +104,15 @@ int FunctionCall::compile(BlockContext context)
 
 	// handle user defined functions
 	// save fsfp and return address
-	context->instrIndex += 5;
+	context->instrIndex += 5 + (params.size() * 2);
+	//context->instrIndex += 5;
 	Output::code() << Push{ (operand) context->instrIndex } << Call{ };
+
+	// copy parameters to next stack frame
+	//for (int i = -((int) params.size()); i < 0; i++) {
+	for (int i = -((int)params.size() + 1); i < -1; i++) {
+		Output::code() << Push{ (operand) i } << Load{ };
+	}
 
 	// find respective function table entry
 	auto funTableEntry = context->functionRefs.find(funName);
@@ -116,7 +123,7 @@ int FunctionCall::compile(BlockContext context)
 
 	// jump to the function
 	auto jmpTarget = funTableEntry->second * 3;
-	Output::code() << Push{ 1 } << Push{ (operand) jmpTarget } << Jmp{};
+	Output::code() << Push{ 1 } << Push{ (operand) jmpTarget } << Jmpc{};
 
 	return EXIT_SUCCESS;
 }
@@ -172,8 +179,8 @@ int Return::compile(BlockContext context)
 	auto err = expr.compile(context);
 	if (err) return err;
 
-	Output::code() << Ret{ };
-	context->instrIndex++;
+	Output::code() << Ret{ } << Jmp{ };
+	context->instrIndex += 2;
 
 	return EXIT_SUCCESS;
 }
@@ -185,7 +192,7 @@ int Branch::compile(BlockContext context)
 	if (err) return err;
 	Output::code() << Not{ };
 
-	// preliminary incr for following Push/Jmp because body needs to know
+	// preliminary incr for following Push/Jmpc because body needs to know
 	context->instrIndex += 3;
 
 	// buffer block body
@@ -196,7 +203,7 @@ int Branch::compile(BlockContext context)
 
 	// compile conditional body skip
 	auto jmpTarget = (operand) context->instrIndex;
-	Output::code() << Push{ jmpTarget } << Jmp{ };
+	Output::code() << Push{ jmpTarget } << Jmpc{ };
 
 	// output body bytecode
 	Output::code() << buf;
@@ -214,7 +221,7 @@ int Loop::compile(BlockContext context)
 	if (err) return err;
 	Output::code() << Not{ };
 
-	// preliminary incr for following Push/Jmp because body needs to know
+	// preliminary incr for following Push/Jmpc because body needs to know
 	context->instrIndex += 3;
 
 	// buffer block body
@@ -225,13 +232,13 @@ int Loop::compile(BlockContext context)
 
 	// compile conditional body skip
 	auto jmpTarget = (operand)(context->instrIndex + 3);
-	Output::code() << Push{ jmpTarget } << Jmp{ };
+	Output::code() << Push{ jmpTarget } << Jmpc{ };
 
 	// output body bytecode
 	Output::code() << buf;
 
 	// unconditionally jump to the beginning of the body
-	Output::code() << Push{ 1 } << Push{ loopBegin } << Jmp{};
+	Output::code() << Push{ 1 } << Push{ loopBegin } << Jmpc{};
 	context->instrIndex += 3;
 
 	return EXIT_SUCCESS;
@@ -298,12 +305,12 @@ int Program::compile()
 	// compile function table
 	for (auto& f : functions) {
 		if (f.name == "main") {
-			Output::code() << Push{ 1 } << Push{ (operand) f.entryPoint } << Jmp{ };
+			Output::code() << Push{ 1 } << Push{ (operand) f.entryPoint } << Jmpc{ };
 		}
 	}
 	for (auto& f : functions) {
 		if (f.name != "main") {
-			Output::code() << Push{ 1 } << Push{ (operand) f.entryPoint } << Jmp{ };
+			Output::code() << Push{ 1 } << Push{ (operand) f.entryPoint } << Jmpc{ };
 		}
 	}
 

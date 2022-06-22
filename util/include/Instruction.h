@@ -10,7 +10,7 @@ using std::vector, std::string;
 struct Instruction;
 using word = long long;             // 64 bit
 using operation = unsigned char;    //  8 bit
-using operand = unsigned short;     // 16 bit
+using operand = short;     // 16 bit
 using stack = vector<word>;
 using instr_seq = vector<std::shared_ptr<Instruction>>;
 using instr_ptr = instr_seq::size_type;
@@ -74,13 +74,14 @@ struct Instruction
         ENTR = 18,  //
         EXIT = 19,  //
         KILL = 20,  //
-        CALL = 21,  // <op1>
+        CALL = 21,  //
         RET = 22,   // <op1>
-        JMP = 23,   // <op1> <op2>
+        JMP = 23,   // <op1>
+        JMPC = 24,  // <op1> <op2>
 
         // Builtin functions
-        PRNT = 24,  // <op1>
-        READ = 25   //
+        PRNT = 25,  // <op1>
+        READ = 26   //
 	} op;
 
     size_t numStackOperands = 0;
@@ -116,7 +117,7 @@ struct Instruction
         numStackOperands(numStackOperands), numConstOperands(numConstOperands), constOperands(constOperands) {}
     vector<char> toBytes() const;
     static const inline vector<string> INSTR_NAMES {
-            "NEG",            "ADD",            "SUB",            "MUL",            "DIV",            "MOD",            "GT",            "LT",            "EQ",            "NEQ",            "GEQ",            "LEQ",            "NOT",            "AND",            "OR",            "POP",            "PUSH",            "LOAD",            "ENTR",            "EXIT",            "KILL",            "CALL",            "RET",            "JMP",            "PRNT",            "READ",
+            "NEG",            "ADD",            "SUB",            "MUL",            "DIV",            "MOD",            "GT",            "LT",            "EQ",            "NEQ",            "GEQ",            "LEQ",            "NOT",            "AND",            "OR",            "POP",            "PUSH",            "LOAD",            "ENTR",            "EXIT",            "KILL",            "CALL",            "RET",            "JMP",            "JMPC",            "PRNT",            "READ",
     };
 };
 
@@ -233,12 +234,17 @@ struct Ret : public Instruction
 };
 struct Call : public Instruction
 {
-    Call() : Instruction(Opcode::CALL, 1) {}
+    Call() : Instruction(Opcode::CALL, 0) {}    // TODO: no operand
 	ExecStatus exec(ExecContext &context) override;
 };
 struct Jmp : public Instruction
 {
-    Jmp() : Instruction(Opcode::JMP, 2) {}
+    Jmp() : Instruction(Opcode::JMP, 1) {}
+    ExecStatus exec(ExecContext& context) override;
+};
+struct Jmpc : public Instruction
+{
+    Jmpc() : Instruction(Opcode::JMPC, 2) {}
 	ExecStatus exec(ExecContext &context) override;
 };
 struct Print : public Instruction

@@ -111,7 +111,7 @@ When a regular block is entered, save a block stack frame ptr (bsfp).
     Exit
     Kill
     Ret
-    Call <dest>
+    Call
     Jmp  <dest>
     Jmpc <cond> <dest>
 
