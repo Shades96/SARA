@@ -1,0 +1,13 @@
+main() {
+    let n = read();
+    let i = 0;
+    let input = 0;
+    let sum = 0;
+    while i < n {
+        input = read();
+        sum = sum + input;
+        i = i + 1;
+    }
+    print(sum);
+    kill();
+}

@@ -81,7 +81,7 @@ struct Instruction
 
         // Builtin functions
         PRNT = 25,  // <op1>
-        READ = 26   //
+        READ = 26,  //
 	} op;
 
     size_t numStackOperands = 0;

@@ -17,7 +17,7 @@ int main(int argc, char* argv[])
         break;
     }
     case 2: {
-        std::ifstream input{ argv[1] };
+        std::ifstream input{ argv[1], std::ios::binary | std::ios::in };
         if (input.fail()) {
             Output::error() << "Bad input\n";
             return EXIT_FAILURE;

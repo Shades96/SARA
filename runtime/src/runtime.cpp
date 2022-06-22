@@ -191,7 +191,10 @@ ExecStatus Print::exec(ExecContext& context)
 
 ExecStatus Read::exec(ExecContext& context)
 {
-    // TODO
+    word input = 0;
+    Output::log() << ">$ ";
+    std::cin >> input;
+    context.stack.push_back(input);
     return ExecStatus::SUCCESS;
 }
 

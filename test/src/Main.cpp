@@ -65,7 +65,7 @@ int main()
 
             Output::log() << SEP << "Running program...\n";
 
-            std::ifstream bytecodeStream{ bytecodePath };
+            std::ifstream bytecodeStream{ bytecodePath, std::ios::binary | std::ios::in };
             vector<std::shared_ptr<Instruction>> instructions = Instruction::fromBytecode(bytecodeStream);
             Runtime runtime{ instructions };
             err = runtime.run();
