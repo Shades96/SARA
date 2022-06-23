@@ -1,6 +1,8 @@
-# AM22
+# **SARA** (**S**tack **A**utomata are **R**eally **A**wesome)
 
-> Abstrakte Maschinen Projekt SS-2022
+> A compiler for a toy programming language, that compiles to bytecode, together with a stack-based VM that runs it - all written in modern C++17.
+
+This project was created for the course *Abstract Machines* at TU Vienna.
 
 -----------
 -----------
