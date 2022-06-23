@@ -9,22 +9,18 @@ This project was created for the course *Abstract Machines* at TU Vienna.
 ## Compiler
 -----------
 
-### Language Spec
+### Language Spec (EBNF)
 -----------------
 
-    // Program
     Program: { Def ';' }
            ;
 
-    // Function definition
     Def: id '(' Pars ')' Block
        ;
 
-    // Function parameters (0-n)
     Pars: [ { id ',' } id ]
         ;
 
-    // Statements (0-n)
     Block: '{' { Stat ';' } '}'
          ;
 
@@ -38,7 +34,6 @@ This project was created for the course *Abstract Machines* at TU Vienna.
         ;
 
     Lexpr: id
-         | id '[' Expr ']'
          ;
 
     Expr: Term
@@ -48,7 +43,6 @@ This project was created for the course *Abstract Machines* at TU Vienna.
     
     Term: num
         | id
-        | id '[' Expr ']' 
         | id '(' { Expr ',' } Expr ')'
         | '(' Expr ')'
         ;
