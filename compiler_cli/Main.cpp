@@ -26,8 +26,6 @@ int main(int argc, char* argv[])
     case 1: {
         Output::Bytecode::setOutfile("tmp.sara");
         scanner.lex(std::cin, parse);
-        compiler.compile(parser.program);
-        Output::Bytecode::closeOutfile();
         break;
     }
     case 2: {
@@ -38,8 +36,6 @@ int main(int argc, char* argv[])
             return EXIT_FAILURE;
         }
         scanner.lex(input, parse);
-        compiler.compile(parser.program);
-        Output::Bytecode::closeOutfile();
         break;
     }
     default: {
@@ -48,4 +44,9 @@ int main(int argc, char* argv[])
         break;
     }
     }
+
+    compiler.compile(parser.program);
+    Output::Bytecode::flush();
+    Output::Bytecode::closeOutfile();
+    return EXIT_SUCCESS;
 }

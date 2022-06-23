@@ -47,6 +47,9 @@ int Expression::compile(BlockContext context)
 	case Kind::COMPARISON_EQ:
 		Output::code() << Eq{ };
 		break;
+	case Kind::COMPARISON_NEQ:
+		Output::code() << Neq{ };
+		break;
 	case Kind::COMPARISON_GT:
 		Output::code() << Gt{ };
 		break;

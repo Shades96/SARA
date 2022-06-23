@@ -88,6 +88,7 @@ private:
 		DISJUNCTION,
 		COMPARISON_LT,
 		COMPARISON_EQ,
+		COMPARISON_NEQ,
 		COMPARISON_GT
 	} kind = TERM;
 	unique_ptr<Term> term1 = std::make_unique<Term>(), term2;

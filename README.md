@@ -72,10 +72,6 @@ When a function is called, save a function stack frame ptr (fsfp) and the return
 - Within a function block, all references are relative to the fsfp.
 - On return, invalidate everything past the sfp and jump back to the ra.
 
-When a regular block is entered, save a block stack frame ptr (bsfp).
-- Within a regular block, all references are STILL relative to the fsfp.
-- On leaving the block, invalidate everything past the last bsfp.
-
 -------------------
 ### Instruction set
 -------------------
@@ -103,12 +99,10 @@ When a regular block is entered, save a block stack frame ptr (bsfp).
 
     // Stack
     Pop  <src> <dest>
-    Push <val>  // push a constant value onto the stack
-    Load <src>  // push the word at index src onto the stack
+    Push <val>
+    Load <src>
 
     // Control
-    Entr
-    Exit
     Kill
     Ret
     Call

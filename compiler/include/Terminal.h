@@ -11,6 +11,7 @@ struct Terminal
 	{
 		// SYMBOLS
 		SLASH_SLASH = 0,
+		BANG_EQUALS,
 		BANG,
 		DASH,
 		PLUS,

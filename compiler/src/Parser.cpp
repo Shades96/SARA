@@ -196,6 +196,9 @@ int Expression::parse(const Terminal& t, BlockContext context)
 	case Terminal::Kind::EQUALS_EQUALS:
 		kind = COMPARISON_EQ;
 		break;
+	case Terminal::Kind::BANG_EQUALS:
+		kind = COMPARISON_NEQ;
+		break;
 	case Terminal::Kind::GREATER_THAN:
 		kind = COMPARISON_GT;
 		break;

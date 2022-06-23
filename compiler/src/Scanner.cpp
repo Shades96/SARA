@@ -78,6 +78,7 @@ const int Terminal::MAX_IDENTIFIER_LEN = 1024;
 const vector<string> Terminal::KIND_MATCHERS
 {
     "//(.|[ \t])*",
+    "!=",
     "!",
     "-",
     "\\+",

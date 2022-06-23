@@ -1,5 +1,5 @@
 main() {
-    return fac(10);
+    return fac(100);
 }
 
 fac(n) {
@@ -9,7 +9,6 @@ fac(n) {
     while i < n {
         i = i + 1;
         result = result * i;
-        print(result);
     }
     return result;
 }
