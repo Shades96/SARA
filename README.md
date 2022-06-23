@@ -4,6 +4,8 @@
 
 This project was created for the course *Abstract Machines* at TU Vienna.
 
+To build the executables, open the **.sln** file with Visual Studio and build the solution.
+
 -----------
 -----------
 ## Compiler
