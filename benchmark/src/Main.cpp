@@ -15,7 +15,7 @@
 
 using std::string;
 
-const long NUM_ITERATIONS = 1000;
+const long NUM_ITERATIONS = 100000;
 const string PATH_SEP = "/";
 const string TEST_DIR_PATH = "tests";
 const string OUTPUT_DIR_PATH = TEST_DIR_PATH + PATH_SEP + "out";
@@ -84,32 +84,36 @@ int main()
                 i++;
             }
             auto implEnd = std::chrono::steady_clock::now();
-            auto deltaImpl = std::chrono::duration_cast<std::chrono::microseconds>(implEnd - implBegin).count();
+            auto deltaImplMicro = std::chrono::duration_cast<std::chrono::microseconds>(implEnd - implBegin).count();
+            auto deltaImplNano = std::chrono::duration_cast<std::chrono::nanoseconds>(implEnd - implBegin).count();
 
             Output::log() << SEP << "Program terminated with status " << std::to_string(err) << "\n";
-            Output::log() << SEP << "Implementation: " << std::to_string(deltaImpl) << " microseconds\n";
+            Output::log() << "Implementation: " << std::to_string(deltaImplMicro) << " microseconds (= " << std::to_string(deltaImplNano) << " nanoseconds)\n";
+
 
             if (file.path().filename().string() == "fib_iter.test") {
                 auto refBegin = std::chrono::steady_clock::now();
                 i = 0;
                 while (i < NUM_ITERATIONS) {
-                    fib(100);
+                    volatile auto res = fib(100);
                     i++;
                 }
                 auto refEnd = std::chrono::steady_clock::now();
-                auto deltaRef = std::chrono::duration_cast<std::chrono::microseconds>(refEnd - refBegin).count();
-                Output::log() << "Reference: " << std::to_string(deltaRef) << " microseconds\n";
+                auto deltaRefMicro = std::chrono::duration_cast<std::chrono::microseconds>(refEnd - refBegin).count();
+                auto deltaRefNano = std::chrono::duration_cast<std::chrono::nanoseconds>(refEnd - refBegin).count();
+                Output::log() << "Reference: " << std::to_string(deltaRefMicro) << " microseconds (= " << std::to_string(deltaRefNano) << " nanoseconds)\n";
             }
             if (file.path().filename().string() == "fac_iter.test") {
                 auto refBegin = std::chrono::steady_clock::now();
                 i = 0;
                 while (i < NUM_ITERATIONS) {
-                    fac(100);
+                    volatile auto res = fac(100);
                     i++;
                 }
                 auto refEnd = std::chrono::steady_clock::now();
-                auto deltaRef = std::chrono::duration_cast<std::chrono::microseconds>(refEnd - refBegin).count();
-                Output::log() << "Reference: " << std::to_string(deltaRef) << " microseconds\n";
+                auto deltaRefMicro = std::chrono::duration_cast<std::chrono::microseconds>(refEnd - refBegin).count();
+                auto deltaRefNano = std::chrono::duration_cast<std::chrono::nanoseconds>(refEnd - refBegin).count();
+                Output::log() << "Reference: " << std::to_string(deltaRefMicro) << " microseconds (= " << std::to_string(deltaRefNano) << " nanoseconds)\n";
             }
 
             Output::log() << SEP << "\n";
